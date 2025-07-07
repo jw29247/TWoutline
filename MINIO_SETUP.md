@@ -39,7 +39,7 @@ Ensure these environment variables are set in your Outline Railway service:
 FILE_STORAGE=s3
 AWS_ACCESS_KEY_ID=${{MINIO_ROOT_USER}}
 AWS_SECRET_ACCESS_KEY=${{MINIO_ROOT_PASSWORD}}
-AWS_REGION=us-east-1
+AWS_REGION=us-west1
 AWS_S3_UPLOAD_BUCKET_NAME=outline-uploads
 AWS_S3_UPLOAD_BUCKET_URL=https://your-outline-app.up.railway.app/storage
 AWS_S3_UPLOAD_MAX_SIZE=26214400

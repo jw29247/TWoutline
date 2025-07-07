@@ -10,5 +10,12 @@
     "healthcheckTimeout": 120,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
+  },
+  "environments": {
+    "production": {
+      "deploy": {
+        "replicas": 1
+      }
+    }
   }
 }

@@ -15,7 +15,9 @@ This guide walks you through deploying Outline to Railway.com with all necessary
 2. Click "New Project"
 3. Select "Deploy from GitHub repo"
 4. Choose your Outline repository
-5. Railway will automatically detect the configuration
+5. Railway will automatically detect the `railway.json` configuration
+
+Note: The `railway.json` file configures the Outline service build and deployment settings. Additional services (PostgreSQL, Redis, MinIO) must be added separately through the Railway dashboard.
 
 ## Step 2: Add Required Services
 
@@ -29,8 +31,15 @@ This guide walks you through deploying Outline to Railway.com with all necessary
 2. Select "Database" → "Add Redis"
 3. Railway will automatically provide `REDIS_URL`
 
-### MinIO Object Storage
-1. Click "New Service" again
+### File Storage Options
+
+#### Option A: Railway Volume (Simpler, up to 50GB)
+1. In your Outline service settings, go to "Volumes"
+2. Create a new volume with mount path: `/var/lib/outline/data`
+3. Use `FILE_STORAGE=local` in environment variables
+
+#### Option B: MinIO Object Storage (Scalable, S3-compatible)
+1. Click "New Service"
 2. Select "Template" → Search for "MinIO"
 3. Deploy the MinIO template
 4. Note the MinIO service variables:
@@ -111,15 +120,20 @@ SMTP_REPLY_EMAIL=support@yourdomain.com
 SMTP_SECURE=true
 ```
 
-### File Storage with MinIO (Required)
+### File Storage Configuration
 
-MinIO provides S3-compatible object storage within Railway:
+#### Option A: Railway Volume (Recommended for simplicity)
+```
+FILE_STORAGE=local
+FILE_STORAGE_LOCAL_ROOT_DIR=/var/lib/outline/data
+```
 
+#### Option B: MinIO S3-Compatible Storage (Recommended for scale)
 ```
 FILE_STORAGE=s3
 AWS_ACCESS_KEY_ID=${{MINIO_ROOT_USER}}
 AWS_SECRET_ACCESS_KEY=${{MINIO_ROOT_PASSWORD}}
-AWS_REGION=us-east-1
+AWS_REGION=us-west1
 AWS_S3_UPLOAD_BUCKET_NAME=outline-uploads
 AWS_S3_UPLOAD_BUCKET_URL=https://your-app-name.up.railway.app/storage
 AWS_S3_UPLOAD_MAX_SIZE=26214400
@@ -128,7 +142,7 @@ AWS_S3_ACL=private
 AWS_ENDPOINT_URL=http://minio.railway.internal:9000
 ```
 
-Note: The `AWS_S3_UPLOAD_BUCKET_URL` should point to your public URL with `/storage` path for serving files.
+Note: For MinIO, the `AWS_S3_UPLOAD_BUCKET_URL` should point to your public URL with `/storage` path.
 
 ### Optional Features
 ```
@@ -208,9 +222,16 @@ DEBUG=false
 - Check SMTP settings match Resend documentation
 
 ### File Upload Issues
+
+#### Railway Volume Issues
+- Ensure volume is mounted at `/var/lib/outline/data`
+- Check volume size limits (50GB max on Pro plan)
+- Verify `FILE_STORAGE=local` is set
+
+#### MinIO Issues
 - Ensure MinIO service is running
 - Verify bucket 'outline-uploads' exists in MinIO
-- Check that `AWS_S3_FORCE_PATH_STYLE=true` is set for MinIO
+- Check that `AWS_S3_FORCE_PATH_STYLE=true` is set
 - Verify internal networking between services using `minio.railway.internal`
 
 ## Maintenance
@@ -234,3 +255,11 @@ DEBUG=false
 For Outline-specific issues: https://github.com/outline/outline
 For Railway platform issues: https://railway.app/help
 For Resend email issues: https://resend.com/docs
+
+## Important Notes
+
+- **File Storage**: Choose between Railway Volumes (simpler, up to 50GB) or MinIO (scalable, S3-compatible)
+- **Railway Volumes**: Persistent storage mounted at `/var/lib/outline/data`, perfect for smaller deployments
+- **MinIO**: Better for larger deployments or if you need S3-compatible API
+- **Volume Limits**: Free plan: 0.5GB, Hobby: 5GB, Pro/Team: 50GB
+- The Dockerfile's `VOLUME` directive is ignored by Railway but volumes work via Railway's volume feature
