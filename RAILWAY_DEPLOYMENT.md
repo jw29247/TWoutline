@@ -17,7 +17,7 @@ This guide walks you through deploying Outline to Railway.com with all necessary
 4. Choose your Outline repository
 5. Railway will automatically detect the `railway.json` configuration
 
-Note: The `railway.json` file configures the Outline service build and deployment settings. Additional services (PostgreSQL, Redis, MinIO) must be added separately through the Railway dashboard.
+Note: The `railway.json` file configures the Outline service to use `Dockerfile.railway` which builds the entire application from source. Additional services (PostgreSQL, Redis, MinIO) must be added separately through the Railway dashboard.
 
 ## Step 2: Add Required Services
 
@@ -203,6 +203,13 @@ DEBUG=false
 
 ## Troubleshooting
 
+### Build/Deployment Issues
+
+#### "VOLUME keyword is banned" Error
+- This project uses `Dockerfile.railway` which removes the VOLUME directive
+- Ensure Railway is using the correct Dockerfile via `railway.json`
+- If error persists, check that Railway is reading from the correct branch
+
 ### Database Connection Issues
 - Ensure `PGSSLMODE=require` is set
 - Check that `DATABASE_URL` is using Railway's reference variable
@@ -258,8 +265,8 @@ For Resend email issues: https://resend.com/docs
 
 ## Important Notes
 
+- **Dockerfile**: We use `Dockerfile.railway` which removes the VOLUME directive that Railway doesn't support
 - **File Storage**: Choose between Railway Volumes (simpler, up to 50GB) or MinIO (scalable, S3-compatible)
 - **Railway Volumes**: Persistent storage mounted at `/var/lib/outline/data`, perfect for smaller deployments
 - **MinIO**: Better for larger deployments or if you need S3-compatible API
 - **Volume Limits**: Free plan: 0.5GB, Hobby: 5GB, Pro/Team: 50GB
-- The Dockerfile's `VOLUME` directive is ignored by Railway but volumes work via Railway's volume feature

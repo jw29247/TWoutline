@@ -1,0 +1,74 @@
+# Build stage
+ARG APP_PATH=/opt/outline
+FROM node:20 AS build
+
+ARG APP_PATH
+WORKDIR $APP_PATH
+
+# Copy package files
+COPY ./package.json ./yarn.lock ./
+COPY ./patches ./patches
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y cmake && rm -rf /var/lib/apt/lists/*
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Install all dependencies
+RUN yarn install --frozen-lockfile --network-timeout 1000000 && \
+  yarn cache clean
+
+# Copy application code
+COPY . .
+
+# Build the application
+ARG CDN_URL
+RUN yarn build
+
+# Remove dev dependencies and install production only
+RUN rm -rf node_modules && \
+  yarn install --production=true --frozen-lockfile --network-timeout 1000000 && \
+  yarn cache clean
+
+# Runtime stage
+FROM node:20-slim AS runtime
+
+ARG APP_PATH
+WORKDIR $APP_PATH
+
+# Install runtime dependencies
+RUN apt-get update && \
+  apt-get install -y wget && \
+  rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN addgroup --gid 1001 nodejs && \
+  adduser --uid 1001 --ingroup nodejs nodejs
+
+# Copy built application
+COPY --from=build --chown=nodejs:nodejs $APP_PATH/build ./build
+COPY --from=build --chown=nodejs:nodejs $APP_PATH/server ./server
+COPY --from=build --chown=nodejs:nodejs $APP_PATH/public ./public
+COPY --from=build --chown=nodejs:nodejs $APP_PATH/.sequelizerc ./.sequelizerc
+COPY --from=build --chown=nodejs:nodejs $APP_PATH/node_modules ./node_modules
+COPY --from=build --chown=nodejs:nodejs $APP_PATH/package.json ./package.json
+
+# Create data directory
+ENV FILE_STORAGE_LOCAL_ROOT_DIR=/var/lib/outline/data
+RUN mkdir -p "$FILE_STORAGE_LOCAL_ROOT_DIR" && \
+  chown -R nodejs:nodejs "$FILE_STORAGE_LOCAL_ROOT_DIR" && \
+  chmod 755 "$FILE_STORAGE_LOCAL_ROOT_DIR"
+
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Switch to non-root user
+USER nodejs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD wget -qO- "http://localhost:${PORT:-3000}/api/health" | grep -q "OK" || exit 1
+
+EXPOSE 3000
+
+CMD ["yarn", "start"]
