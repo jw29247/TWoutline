@@ -1,180 +1,236 @@
 # Railway Deployment Guide for Outline
 
-This guide will help you deploy Outline wiki on Railway with PostgreSQL and Redis.
+This guide walks you through deploying Outline to Railway.com with all necessary services.
 
 ## Prerequisites
 
-1. A Railway account (https://railway.app)
-2. At least one OAuth provider configured (Google, Slack, Microsoft, or Discord)
-3. (Optional) SMTP credentials for email notifications
+- Railway account (https://railway.app)
+- GitHub repository connected to Railway
+- At least one OAuth provider credentials (Google, Slack, Microsoft, or Discord)
+- Domain configured for Resend email (optional but recommended)
 
-## Deployment Steps
+## Step 1: Create Railway Project
 
-### 1. Create Railway Project
+1. Log in to Railway dashboard
+2. Click "New Project"
+3. Select "Deploy from GitHub repo"
+4. Choose your Outline repository
+5. Railway will automatically detect the configuration
 
-1. Log in to Railway
-2. Create a new project
-3. Choose "Deploy from GitHub repo" and select your forked Outline repository
+## Step 2: Add Required Services
 
-### 2. Add Database Services
-
-#### PostgreSQL
+### PostgreSQL Database
 1. In your Railway project, click "New Service"
 2. Select "Database" → "Add PostgreSQL"
-3. Railway will automatically create a `DATABASE_URL` variable
+3. Railway will automatically provide `DATABASE_URL`
 
-#### Redis
+### Redis
 1. Click "New Service" again
 2. Select "Database" → "Add Redis"
-3. Railway will automatically create a `REDIS_URL` variable
+3. Railway will automatically provide `REDIS_URL`
 
-### 3. Configure Environment Variables
+### MinIO Object Storage
+1. Click "New Service" again
+2. Select "Template" → Search for "MinIO"
+3. Deploy the MinIO template
+4. Note the MinIO service variables:
+   - `MINIO_ROOT_USER` (access key)
+   - `MINIO_ROOT_PASSWORD` (secret key)
+   - Internal URL: `http://minio.railway.internal:9000`
+5. After MinIO deploys, create a bucket named `outline-uploads` (see MINIO_SETUP.md for detailed instructions)
+
+## Step 3: Configure Environment Variables
 
 In your Railway project settings, add these environment variables:
 
-#### Required Core Variables
-
-```bash
-# Application Settings
+### Core Configuration (Required)
+```
 NODE_ENV=production
-URL=https://your-app-name.up.railway.app  # Replace with your Railway URL
-PORT=${{PORT}}  # Railway provides this automatically
-
-# Security Keys (Generate these!)
+URL=https://your-app-name.up.railway.app
+PORT=${{PORT}}
 SECRET_KEY=<generate with: openssl rand -hex 32>
 UTILS_SECRET=<generate with: openssl rand -hex 32>
+FORCE_HTTPS=true
+```
 
-# Database (Railway provides these automatically)
+### Database Configuration (Auto-configured by Railway)
+```
 DATABASE_URL=${{DATABASE_URL}}
-REDIS_URL=${{REDIS_URL}}
-
-# For Railway's PostgreSQL
+DATABASE_CONNECTION_POOL_MIN=2
+DATABASE_CONNECTION_POOL_MAX=10
 PGSSLMODE=require
 ```
 
-#### Authentication (Choose at least ONE)
-
-**Option 1: Google OAuth**
-```bash
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+### Redis Configuration (Auto-configured by Railway)
 ```
-Setup: https://docs.getoutline.com/s/hosting/doc/google-hOuvtCmTqQ
-
-**Option 2: Slack OAuth**
-```bash
-SLACK_CLIENT_ID=your_slack_client_id
-SLACK_CLIENT_SECRET=your_slack_client_secret
+REDIS_URL=${{REDIS_URL}}
 ```
-Setup: https://docs.getoutline.com/s/hosting/doc/slack-sgMujR8J9J
 
-**Option 3: Microsoft/Azure AD**
-```bash
-AZURE_CLIENT_ID=your_azure_client_id
-AZURE_CLIENT_SECRET=your_azure_client_secret
-AZURE_RESOURCE_APP_ID=your_resource_app_id
+### Authentication (Choose at least one)
+
+#### Google OAuth
 ```
-Setup: https://docs.getoutline.com/s/hosting/doc/microsoft-entra-UVz6jsIOcv
-
-**Option 4: Discord**
-```bash
-DISCORD_CLIENT_ID=your_discord_client_id
-DISCORD_CLIENT_SECRET=your_discord_client_secret
-DISCORD_SERVER_ID=your_server_id  # Optional
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
 ```
-Setup: https://docs.getoutline.com/s/hosting/doc/discord-g4JdWFFub6
 
-#### Optional: Email Configuration
+#### Slack OAuth
+```
+SLACK_CLIENT_ID=your-slack-client-id
+SLACK_CLIENT_SECRET=your-slack-client-secret
+```
 
-For email notifications (password resets, document updates, etc.):
+#### Microsoft/Azure AD
+```
+AZURE_CLIENT_ID=your-azure-client-id
+AZURE_CLIENT_SECRET=your-azure-client-secret
+AZURE_RESOURCE_APP_ID=your-azure-resource-app-id
+```
 
-**Using a Well-known Service (e.g., Gmail, SendGrid)**
-```bash
-SMTP_SERVICE=gmail  # or sendgrid, mailgun, etc.
-SMTP_USERNAME=your_email@gmail.com
-SMTP_PASSWORD=your_app_specific_password
+#### Discord OAuth
+```
+DISCORD_CLIENT_ID=your-discord-client-id
+DISCORD_CLIENT_SECRET=your-discord-client-secret
+DISCORD_SERVER_ID=your-discord-server-id
+```
+
+### Email Configuration with Resend (Recommended)
+
+1. Sign up for Resend at https://resend.com
+2. Create an API key
+3. Add these environment variables:
+
+```
+SMTP_SERVICE=resend
+SMTP_HOST=smtp.resend.com
+SMTP_PORT=465
+SMTP_USERNAME=resend
+SMTP_PASSWORD=<your-resend-api-key>
 SMTP_FROM_EMAIL=notifications@yourdomain.com
-```
-
-**Using Custom SMTP**
-```bash
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USERNAME=your_username
-SMTP_PASSWORD=your_password
-SMTP_FROM_EMAIL=notifications@yourdomain.com
+SMTP_REPLY_EMAIL=support@yourdomain.com
 SMTP_SECURE=true
 ```
 
-#### Optional: File Storage
+### File Storage with MinIO (Required)
 
-By default, files are stored locally. For production, consider S3:
+MinIO provides S3-compatible object storage within Railway:
 
-```bash
+```
 FILE_STORAGE=s3
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_ACCESS_KEY_ID=${{MINIO_ROOT_USER}}
+AWS_SECRET_ACCESS_KEY=${{MINIO_ROOT_PASSWORD}}
 AWS_REGION=us-east-1
-AWS_S3_UPLOAD_BUCKET_NAME=your-outline-bucket
-AWS_S3_UPLOAD_BUCKET_URL=https://your-bucket.s3.amazonaws.com
-AWS_S3_FORCE_PATH_STYLE=false
+AWS_S3_UPLOAD_BUCKET_NAME=outline-uploads
+AWS_S3_UPLOAD_BUCKET_URL=https://your-app-name.up.railway.app/storage
+AWS_S3_UPLOAD_MAX_SIZE=26214400
+AWS_S3_FORCE_PATH_STYLE=true
 AWS_S3_ACL=private
+AWS_ENDPOINT_URL=http://minio.railway.internal:9000
 ```
 
-### 4. Deploy
+Note: The `AWS_S3_UPLOAD_BUCKET_URL` should point to your public URL with `/storage` path for serving files.
 
-1. After setting all environment variables, Railway will automatically deploy
-2. Monitor the deployment logs for any errors
-3. The database migrations will run automatically on first deploy
+### Optional Features
+```
+# Sentry error tracking
+SENTRY_DSN=your-sentry-dsn
 
-### 5. Access Your Instance
+# Rate limiting
+RATE_LIMITER_ENABLED=true
+RATE_LIMITER_REQUESTS=1000
+RATE_LIMITER_DURATION_WINDOW=60
 
-1. Once deployed, visit your Railway-provided URL
-2. You'll be redirected to sign in with your configured OAuth provider
-3. The first user to sign in becomes the admin
+# Collaboration
+COLLABORATION_URL=wss://your-app-name.up.railway.app
+
+# Development/Debug (set to false in production)
+DEBUG=false
+```
+
+## Step 4: Deploy
+
+1. After configuring all environment variables, Railway will automatically deploy
+2. Monitor the build logs in Railway dashboard
+3. Once deployed, visit your URL to complete setup
+
+## Step 5: Initial Setup
+
+1. Navigate to your Outline URL
+2. Sign in with your configured OAuth provider
+3. Complete the initial workspace setup
+4. Configure teams and permissions as needed
+
+## Setting Up OAuth Providers
+
+### Google OAuth Setup
+1. Go to https://console.cloud.google.com
+2. Create a new project or select existing
+3. Enable Google+ API
+4. Create OAuth 2.0 credentials
+5. Add authorized redirect URI: `https://your-app-name.up.railway.app/auth/google.callback`
+
+### Slack OAuth Setup
+1. Go to https://api.slack.com/apps
+2. Create a new app
+3. Add OAuth redirect URL: `https://your-app-name.up.railway.app/auth/slack.callback`
+4. Add required scopes: `identity.avatar`, `identity.basic`, `identity.team`, `identity.email`
+
+### Microsoft/Azure AD Setup
+1. Go to https://portal.azure.com
+2. Register a new application
+3. Add redirect URI: `https://your-app-name.up.railway.app/auth/azure.callback`
+4. Create a client secret
+
+### Discord OAuth Setup
+1. Go to https://discord.com/developers/applications
+2. Create a new application
+3. Add redirect URI: `https://your-app-name.up.railway.app/auth/discord.callback`
+4. Copy Client ID and Secret
 
 ## Troubleshooting
 
-### Common Issues
+### Database Connection Issues
+- Ensure `PGSSLMODE=require` is set
+- Check that `DATABASE_URL` is using Railway's reference variable
 
-1. **"No authentication providers configured"**
-   - Ensure you've set up at least one OAuth provider correctly
-   - Check that client ID and secret are properly set
+### Redis Connection Issues
+- Verify `REDIS_URL` is using Railway's reference variable
+- Redis should be in the same project for internal networking
 
-2. **Database connection errors**
-   - Verify `DATABASE_URL` is using Railway's PostgreSQL variable reference
-   - Ensure `PGSSLMODE=require` is set
+### Authentication Issues
+- Verify OAuth redirect URIs match your Railway URL exactly
+- Ensure client IDs and secrets are correct
+- Check that at least one auth provider is configured
 
-3. **Redis connection errors**
-   - Verify `REDIS_URL` is using Railway's Redis variable reference
+### Email Issues
+- Verify Resend API key is correct
+- Ensure FROM email is verified in Resend
+- Check SMTP settings match Resend documentation
 
-4. **File upload issues**
-   - For local storage, Railway provides ephemeral storage
-   - Consider configuring S3 for persistent file storage
+### File Upload Issues
+- Ensure MinIO service is running
+- Verify bucket 'outline-uploads' exists in MinIO
+- Check that `AWS_S3_FORCE_PATH_STYLE=true` is set for MinIO
+- Verify internal networking between services using `minio.railway.internal`
 
-### Logs
+## Maintenance
 
-Monitor logs in Railway dashboard:
-- Web service logs for application errors
-- Database logs for connection issues
+### Database Backups
+- Use Railway's database backup feature
+- Schedule regular backups through Railway dashboard
 
-## Security Notes
+### Monitoring
+- Monitor application logs in Railway
+- Set up Sentry for error tracking
+- Use Railway's metrics dashboard
 
-1. Always use strong, randomly generated values for `SECRET_KEY` and `UTILS_SECRET`
-2. Enable 2FA on your Railway account
-3. Regularly update Outline to get security patches
-4. Configure rate limiting (enabled by default)
-
-## Next Steps
-
-1. Configure additional OAuth providers for redundancy
-2. Set up email for better user experience
-3. Configure S3 for scalable file storage
-4. Set up custom domain in Railway settings
-5. Enable automatic backups for PostgreSQL
+### Updates
+- Updates deploy automatically when pushing to connected branch
+- Database migrations run automatically on deployment
+- No manual intervention required for most updates
 
 ## Support
 
-- Outline Documentation: https://docs.getoutline.com
-- Railway Documentation: https://docs.railway.app
-- Outline Community: https://github.com/outline/outline/discussions
+For Outline-specific issues: https://github.com/outline/outline
+For Railway platform issues: https://railway.app/help
+For Resend email issues: https://resend.com/docs
