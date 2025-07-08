@@ -38,9 +38,14 @@ RUN mkdir -p "$FILE_STORAGE_LOCAL_ROOT_DIR" && \
   chown -R nodejs:nodejs "$FILE_STORAGE_LOCAL_ROOT_DIR" && \
   chmod 1777 "$FILE_STORAGE_LOCAL_ROOT_DIR"
 
+# Copy entrypoint script
+COPY --chown=nodejs:nodejs ./docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 USER nodejs
 
 HEALTHCHECK --interval=1m CMD wget -qO- "http://localhost:${PORT:-3000}/_health" | grep -q "OK" || exit 1
 
 EXPOSE 3000
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["yarn", "start"]
