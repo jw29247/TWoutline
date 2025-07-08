@@ -131,7 +131,7 @@
     "fetch-with-proxy": "^3.0.1",
     "form-data": "^4.0.2",
     "fractional-index": "^1.0.0",
-    "framer-motion": "^4.1.17",
+    "framer-motion": "^12.23.0",
     "fs-extra": "^11.2.0",
     "fuzzy-search": "^3.2.1",
     "glob": "^8.1.0",
