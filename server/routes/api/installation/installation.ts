@@ -24,14 +24,15 @@ router.post(
     const { teamName, userName, userEmail } = ctx.input.body;
     const { transaction } = ctx.state;
 
-    // Check that this can only be called when there are no existing teams
-    // unless we're in setup mode
-    if (!isInSetupMode()) {
-      const existingTeamCount = await Team.count({ transaction });
-      if (existingTeamCount > 0) {
-        throw ValidationError("Installation already has existing teams");
-      }
-    }
+    // TEMPORARY: Skip team check to allow forced setup
+    // // Check that this can only be called when there are no existing teams
+    // // unless we're in setup mode
+    // if (!isInSetupMode()) {
+    //   const existingTeamCount = await Team.count({ transaction });
+    //   if (existingTeamCount > 0) {
+    //     throw ValidationError("Installation already has existing teams");
+    //   }
+    // }
 
     const team = await teamCreator({
       name: teamName,

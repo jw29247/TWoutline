@@ -105,9 +105,11 @@ router.use("/", userMemberships.routes());
 router.use("/", reactions.routes());
 router.use("/", imports.routes());
 
-if (!env.isCloudHosted || isInSetupMode()) {
-  router.use("/", installation.routes());
-}
+// TEMPORARY: Always enable installation routes
+router.use("/", installation.routes());
+// if (!env.isCloudHosted || isInSetupMode()) {
+//   router.use("/", installation.routes());
+// }
 
 if (env.isDevelopment) {
   router.use("/", developer.routes());

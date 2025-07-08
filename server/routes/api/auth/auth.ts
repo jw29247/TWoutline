@@ -26,16 +26,18 @@ import * as T from "./schema";
 const router = new Router();
 
 router.post("auth.config", async (ctx: APIContext<T.AuthConfigReq>) => {
-  // Force setup mode if FORCE_SETUP_MODE is true
-  if (isInSetupMode()) {
-    // Return empty providers to trigger installation wizard
-    ctx.body = {
-      data: {
-        providers: [],
-      },
-    };
-    return;
-  }
+  // TEMPORARY: Comment out setup mode check
+  // // Force setup mode if FORCE_SETUP_MODE is true
+  // if (isInSetupMode()) {
+  //   // Return empty providers and no name to trigger installation wizard
+  //   ctx.body = {
+  //     data: {
+  //       providers: [],
+  //       // Don't include name to ensure firstRun condition is met
+  //     },
+  //   };
+  //   return;
+  // }
 
   // If self hosted AND there is only one team then that team becomes the
   // brand for the knowledge base and it's guest signin option is used for the
