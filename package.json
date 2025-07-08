@@ -367,7 +367,7 @@
     "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.6.2",
     "react-refresh": "^0.17.0",
-    "rimraf": "^2.5.4",
+    "rimraf": "^6.0.1",
     "rollup-plugin-webpack-stats": "^2.0.5",
     "terser": "^5.43.1",
     "typescript": "^5.8.3",
