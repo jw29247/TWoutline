@@ -43,6 +43,7 @@ import urls from "./urls";
 import userMemberships from "./userMemberships";
 import users from "./users";
 import views from "./views";
+import { isInSetupMode } from "@server/utils/setupMode";
 
 const api = new Koa<AppState, AppContext>();
 const router = new Router();
@@ -104,7 +105,7 @@ router.use("/", userMemberships.routes());
 router.use("/", reactions.routes());
 router.use("/", imports.routes());
 
-if (!env.isCloudHosted) {
+if (!env.isCloudHosted || isInSetupMode()) {
   router.use("/", installation.routes());
 }
 

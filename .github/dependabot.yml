@@ -5,24 +5,118 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
-    open-pull-requests-limit: 5
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+  # NPM dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    open-pull-requests-limit: 10
+    # Allow both direct and indirect (transitive) dependency updates
+    allow:
+      - dependency-type: "all"
+    # Ignore major version updates for stable packages
+    ignore:
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "sequelize"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "prosemirror-*"
+        update-types: ["version-update:semver-major"]
+    # Group related dependencies
     groups:
+      # Group all babel packages
       babel:
         patterns:
           - "@babel/*"
+          - "babel-*"
+      # Group all sentry packages
       sentry:
         patterns:
           - "@sentry/*"
+      # Group all font awesome packages
       fortawesome:
         patterns:
           - "@fortawesome/*"
+      # Group all AWS SDK packages
       aws:
         patterns:
           - "@aws-sdk/*"
+          - "aws-sdk"
+      # Group testing libraries
+      testing:
+        patterns:
+          - "jest"
+          - "@types/jest"
+          - "@testing-library/*"
+          - "jest-*"
+      # Group React ecosystem
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      # Group TypeScript and related
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "ts-*"
+      # Group ESLint and plugins
+      eslint:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+      # Group Vite and plugins
+      vite:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "vite-*"
+    # Add labels to PRs
+    labels:
+      - "dependencies"
+      - "automated"
+    # Prefix commit messages
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+  
+  # Docker base image updates
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    open-pull-requests-limit: 2
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+  
+  # GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      include: "scope"

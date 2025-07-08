@@ -1,0 +1,65 @@
+diff --git a/server/routes/api/auth/auth.ts b/server/routes/api/auth/auth.ts
+index 1234567..abcdefg 100644
+--- a/server/routes/api/auth/auth.ts
++++ b/server/routes/api/auth/auth.ts
+@@ -21,6 +21,7 @@ import ValidateSSOAccessTask from "@server/queues/tasks/ValidateSSOAccessTask";
+ import { APIContext } from "@server/types";
+ import { getSessionsInCookie } from "@server/utils/authentication";
+ import * as T from "./schema";
++import { isSetupModeActive } from "@server/utils/railwaySetup";
+ 
+ const router = new Router();
+ 
+@@ -28,7 +29,8 @@ router.post("auth.config", async (ctx: APIContext<T.AuthConfigReq>) => {
+   // If self hosted AND there is only one team then that team becomes the
+   // brand for the knowledge base and it's guest signin option is used for the
+   // root login page.
+-  if (!env.isCloudHosted) {
++  const effectivelySelfHosted = !env.isCloudHosted || isSetupModeActive();
++  if (effectivelySelfHosted) {
+     const team = await Team.scope("withAuthenticationProviders").findOne({
+       order: [["createdAt", "DESC"]],
+     });
+
+diff --git a/server/routes/api/index.ts b/server/routes/api/index.ts
+index 7890abc..defghij 100644
+--- a/server/routes/api/index.ts
++++ b/server/routes/api/index.ts
+@@ -44,6 +44,7 @@ import userMemberships from "./userMemberships";
+ import users from "./users";
+ import views from "./views";
++import { isSetupModeActive } from "@server/utils/railwaySetup";
+ 
+ const api = new Koa<AppState, AppContext>();
+ const router = new Router();
+@@ -105,7 +106,8 @@ router.use("/", userMemberships.routes());
+ router.use("/", reactions.routes());
+ router.use("/", imports.routes());
+ 
+-if (!env.isCloudHosted) {
++const effectivelySelfHosted = !env.isCloudHosted || isSetupModeActive();
++if (effectivelySelfHosted) {
+   router.use("/", installation.routes());
+ }
+
+diff --git a/server/routes/api/installation/installation.ts b/server/routes/api/installation/installation.ts
+index abcd123..efgh456 100644
+--- a/server/routes/api/installation/installation.ts
++++ b/server/routes/api/installation/installation.ts
+@@ -11,6 +11,7 @@ import { APIContext } from "@server/types";
+ import { signIn } from "@server/utils/authentication";
+ import { getVersion, getVersionInfo } from "@server/utils/getInstallationInfo";
+ import * as T from "./schema";
++import { markSetupCompleted } from "@server/utils/railwaySetup";
+ 
+ // Note: This entire router is only mounted in self-hosted installations.
+ const router = new Router();
+@@ -56,6 +57,9 @@ router.post(
+       isNewUser: true,
+       client: Client.Web,
+     });
++    
++    // Mark setup as completed if in Railway setup mode
++    markSetupCompleted();
+   }
+ );

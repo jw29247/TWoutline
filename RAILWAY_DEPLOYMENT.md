@@ -182,10 +182,29 @@ If the deployment fails or health checks don't pass:
 
 ## Step 5: Initial Setup
 
+### Option A: Using OAuth Provider (Standard)
 1. Navigate to your Outline URL
 2. Sign in with your configured OAuth provider
 3. Complete the initial workspace setup
 4. Configure teams and permissions as needed
+
+### Option B: Using Installation Wizard (No OAuth)
+If you haven't configured OAuth providers yet or need to reset:
+
+1. Add this environment variable in Railway:
+   ```
+   FORCE_SETUP_MODE=true
+   ```
+2. Redeploy your service
+3. Visit your Railway URL - you'll see the installation wizard
+4. Enter your workspace name and admin user details
+5. Complete the setup
+6. **Important**: Remove `FORCE_SETUP_MODE` from Railway and redeploy
+
+This setup mode is useful when:
+- Setting up a fresh instance without OAuth
+- You need to create the first admin user manually
+- OAuth providers aren't working correctly
 
 ## Setting Up OAuth Providers
 

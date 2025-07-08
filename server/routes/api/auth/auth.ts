@@ -20,6 +20,7 @@ import {
 import ValidateSSOAccessTask from "@server/queues/tasks/ValidateSSOAccessTask";
 import { APIContext } from "@server/types";
 import { getSessionsInCookie } from "@server/utils/authentication";
+import { isInSetupMode } from "@server/utils/setupMode";
 import * as T from "./schema";
 
 const router = new Router();
@@ -27,8 +28,8 @@ const router = new Router();
 router.post("auth.config", async (ctx: APIContext<T.AuthConfigReq>) => {
   // If self hosted AND there is only one team then that team becomes the
   // brand for the knowledge base and it's guest signin option is used for the
-  // root login page.
-  if (!env.isCloudHosted) {
+  // root login page. Also check for setup mode override.
+  if (!env.isCloudHosted || isInSetupMode()) {
     const team = await Team.scope("withAuthenticationProviders").findOne({
       order: [["createdAt", "DESC"]],
     });

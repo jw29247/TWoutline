@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Outline is a fast, collaborative wiki and knowledge base built with TypeScript. It's a monorepo application with separate frontend (React) and backend (Koa) components that share common code.
 
+## Documentation
+
+- refer to the docs folder for extensive documentation
+
 ## Architecture
 
 ### High-Level Structure
@@ -58,7 +62,7 @@ yarn test -- --coverage # With coverage
 # Linting
 yarn lint               # Lint all files
 yarn lint:changed       # Lint only changed files
-yarn lint --fix         # Auto-fix issues
+yarn lint --fix        # Auto-fix issues
 
 # Build for production
 yarn build              # Build everything
@@ -203,3 +207,4 @@ Real-time updates via Socket.io:
 - File upload restrictions
 - SQL injection prevention via Sequelize
 - Permission checks on all data access
+```
