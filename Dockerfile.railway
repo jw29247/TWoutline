@@ -1,6 +1,6 @@
 # Build stage
 ARG APP_PATH=/opt/outline
-FROM node:20 AS build
+FROM node:24 AS build
 
 ARG APP_PATH
 WORKDIR $APP_PATH
@@ -30,7 +30,7 @@ RUN rm -rf node_modules && \
   yarn cache clean
 
 # Runtime stage
-FROM node:20-slim AS runtime
+FROM node:24-slim AS runtime
 
 ARG APP_PATH
 WORKDIR $APP_PATH
