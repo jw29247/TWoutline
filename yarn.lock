@@ -4034,11 +4034,11 @@
     "@react-types/shared" "^3.14.1"
 
 "@react-types/label@^3.6.3":
-  version "3.6.3"
-  resolved "https://registry.yarnpkg.com/@react-types/label/-/label-3.6.3.tgz#d0fa3c9b573a666ffa2f4197eff694fc96a1ad48"
-  integrity "sha1-0Po8m1c6Zm/6L0GX7/aU/JahrUg= sha512-Q+8qx4x7+ZqgdfNJorX7CqysYAGAeT1IWzJyNxwcT1OLjFuUIBJyg7njjpkZyK8sFFYdGIKhLxk0Q1Sf8Y5Stw=="
+  version "3.9.12"
+  resolved "https://registry.yarnpkg.com/@react-types/label/-/label-3.9.12.tgz#950eadaec64c6168928da263e3bea7a8fe1e2b55"
+  integrity sha512-l1UwZIx8kzu3aVxh/b9xLk+WzzzWefMBH/9FfXNxEnhW/Gin7N7SJS8vJqs6QjBjAADJ+kGBGLUv5g/wMzEDTQ==
   dependencies:
-    "@react-types/shared" "^3.14.1"
+    "@react-types/shared" "^3.30.0"
 
 "@react-types/radio@^3.2.3":
   version "3.2.3"
@@ -4051,6 +4051,11 @@
   version "3.14.1"
   resolved "https://registry.yarnpkg.com/@react-types/shared/-/shared-3.14.1.tgz#8fe25f729426e8043054e442eb5392364200e028"
   integrity "sha1-j+JfcpQm6AQwVORC61OSNkIA4Cg= sha512-yPPgVRWWanXqbdxFTgJmVwx0JlcnEK3dqkKDIbVk6mxAHvEESI9+oDnHvO8IMHqF+GbrTCzVtAs0zwhYI/uHJA=="
+
+"@react-types/shared@^3.30.0":
+  version "3.30.0"
+  resolved "https://registry.yarnpkg.com/@react-types/shared/-/shared-3.30.0.tgz#616f3644e687ec3657e97bb821f8c219f6771311"
+  integrity sha512-COIazDAx1ncDg046cTJ8SFYsX8aS3lB/08LDnbkH/SkdYrFPWDlXMrO/sUam8j1WWM+PJ+4d1mj7tODIKNiFog==
 
 "@react-types/slider@^3.0.3", "@react-types/slider@^3.2.1":
   version "3.2.1"
