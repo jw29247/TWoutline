@@ -10,6 +10,7 @@ import { Team, User } from "@server/models";
 import { APIContext } from "@server/types";
 import { signIn } from "@server/utils/authentication";
 import { getVersion, getVersionInfo } from "@server/utils/getInstallationInfo";
+import { isInSetupMode } from "@server/utils/setupMode";
 import * as T from "./schema";
 
 // Note: This entire router is only mounted in self-hosted installations.
@@ -24,9 +25,12 @@ router.post(
     const { transaction } = ctx.state;
 
     // Check that this can only be called when there are no existing teams
-    const existingTeamCount = await Team.count({ transaction });
-    if (existingTeamCount > 0) {
-      throw ValidationError("Installation already has existing teams");
+    // unless we're in setup mode
+    if (!isInSetupMode()) {
+      const existingTeamCount = await Team.count({ transaction });
+      if (existingTeamCount > 0) {
+        throw ValidationError("Installation already has existing teams");
+      }
     }
 
     const team = await teamCreator({

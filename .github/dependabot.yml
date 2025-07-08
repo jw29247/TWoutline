@@ -84,6 +84,7 @@ updates:
     labels:
       - "dependencies"
       - "automated"
+      - "automerge"
     # Prefix commit messages
     commit-message:
       prefix: "chore"
@@ -101,6 +102,7 @@ updates:
       - "dependencies"
       - "docker"
       - "automated"
+      - "automerge"
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -117,6 +119,7 @@ updates:
       - "dependencies"
       - "github-actions"
       - "automated"
+      - "automerge"
     commit-message:
       prefix: "chore"
       include: "scope"

@@ -18,6 +18,20 @@ env:
   SMTP_USERNAME: localhost
 
 jobs:
+  # Save PR number for merge-after-ci workflow
+  save-pr:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Save PR number
+        run: |
+          mkdir -p ./pr
+          echo ${{ github.event.number }} > ./pr/NR
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pr
+          path: pr/
+
   build:
     runs-on: ubuntu-latest
     strategy:
