@@ -56,11 +56,12 @@ In your Railway project settings, add these environment variables:
 ```
 NODE_ENV=production
 URL=https://your-app-name.up.railway.app
-PORT=${{PORT}}
 SECRET_KEY=<generate with: openssl rand -hex 32>
 UTILS_SECRET=<generate with: openssl rand -hex 32>
 FORCE_HTTPS=true
 ```
+
+Note: Railway automatically provides the PORT variable. Do not set it manually.
 
 ### Database Configuration (Auto-configured by Railway)
 ```
@@ -165,7 +166,19 @@ DEBUG=false
 
 1. After configuring all environment variables, Railway will automatically deploy
 2. Monitor the build logs in Railway dashboard
-3. Once deployed, visit your URL to complete setup
+3. Check the deployment logs for any startup errors
+4. The health check at `/_health` must pass (requires DB and Redis)
+5. Once deployed, visit your URL to complete setup
+
+### Debugging Deployment Issues
+
+If the deployment fails or health checks don't pass:
+
+1. Check the logs in Railway dashboard
+2. Run the environment check locally: `node check-env.js`
+3. Ensure PostgreSQL and Redis services are running
+4. Verify all required environment variables are set
+5. Confirm at least one auth provider is configured
 
 ## Step 5: Initial Setup
 
@@ -209,6 +222,22 @@ DEBUG=false
 - This project uses `Dockerfile.railway` which removes the VOLUME directive
 - Ensure Railway is using the correct Dockerfile via `railway.json`
 - If error persists, check that Railway is reading from the correct branch
+
+#### "PORT variable must be integer" Error
+- Do NOT set PORT in your environment variables
+- Railway automatically provides PORT at runtime
+- The application will use Railway's PORT or default to 3000
+
+#### Health Check Failing
+- The health check endpoint is `/_health` (not `/api/health`)
+- Health check requires both PostgreSQL and Redis to be running
+- Ensure DATABASE_URL and REDIS_URL are properly configured
+- Check application logs for specific startup errors
+- Common issues:
+  - Missing required environment variables (SECRET_KEY, UTILS_SECRET)
+  - Database not yet provisioned
+  - Redis not yet running
+  - No authentication provider configured
 
 ### Database Connection Issues
 - Ensure `PGSSLMODE=require` is set

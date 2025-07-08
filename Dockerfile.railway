@@ -60,15 +60,16 @@ RUN mkdir -p "$FILE_STORAGE_LOCAL_ROOT_DIR" && \
 
 # Set environment
 ENV NODE_ENV=production
-ENV PORT=3000
+# PORT will be provided by Railway at runtime
 
 # Switch to non-root user
 USER nodejs
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget -qO- "http://localhost:${PORT:-3000}/api/health" | grep -q "OK" || exit 1
+  CMD wget -qO- "http://localhost:${PORT:-3000}/_health" | grep -q "OK" || exit 1
 
+# EXPOSE is informational only, Railway will handle port binding
 EXPOSE 3000
 
 CMD ["yarn", "start"]
