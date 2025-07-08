@@ -8660,9 +8660,9 @@ ejs@^3.1.10, ejs@^3.1.6:
     jake "^10.8.5"
 
 electron-to-chromium@^1.5.73:
-  version "1.5.99"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.99.tgz#4817c7526d71b66e6c56c3e5231fe1113653a85d"
-  integrity sha512-77c/+fCyL2U+aOyqfIFi89wYLBeSTCs55xCZL0oFH0KjqsvSvyh6AdQ+UIl1vgpnQQE6g+/KK8hOIupH6VwPtg==
+  version "1.5.180"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.180.tgz#3e4f6e7494d6371e014af176dfdfd43c8a4b56df"
+  integrity sha512-ED+GEyEh3kYMwt2faNmgMB0b8O5qtATGgR4RmRsIp4T6p7B8vdMbIedYndnvZfsaXvSzegtpfqRMDNCjjiSduA==
 
 email-providers@^1.14.0:
   version "1.14.0"
