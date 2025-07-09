@@ -112,13 +112,13 @@ function AppSidebar() {
           </Overflow>
           <Scrollable flex shadow>
             <Section>
+              <Tools />
+            </Section>
+            <Section>
               <Starred />
             </Section>
             <Section>
               <SharedWithMe />
-            </Section>
-            <Section>
-              <Tools />
             </Section>
             <Section>
               <Collections />

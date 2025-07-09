@@ -18,11 +18,24 @@ import SettingRow from "./components/SettingRow";
 function Tools() {
   const { t } = useTranslation();
   const team = useCurrentTeam();
-  const [tools, setTools] = useState<Tool[]>(
-    team.getPreference(TeamPreference.Tools) || []
-  );
+
+  // Initialize tools from team preferences
+  const initialTools = React.useMemo(() => {
+    const toolsFromPrefs = team.preferences?.[TeamPreference.Tools];
+    return Array.isArray(toolsFromPrefs) ? toolsFromPrefs : [];
+  }, [team.preferences]);
+
+  const [tools, setTools] = useState<Tool[]>(initialTools);
   const [editingTool, setEditingTool] = useState<Tool | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // Update tools when team preferences change
+  React.useEffect(() => {
+    const toolsFromPrefs = team.preferences?.[TeamPreference.Tools];
+    if (Array.isArray(toolsFromPrefs)) {
+      setTools(toolsFromPrefs);
+    }
+  }, [team.preferences]);
 
   const handleSubmit = useCallback(
     async (event?: React.SyntheticEvent) => {
@@ -31,12 +44,17 @@ function Tools() {
       }
 
       try {
+        // Create a new preferences object with the tools
+        const updatedPreferences = {
+          ...team.preferences,
+          [TeamPreference.Tools]: tools,
+        };
+
+        // Save the team with updated preferences
         await team.save({
-          preferences: {
-            ...team.preferences,
-            [TeamPreference.Tools]: tools,
-          },
+          preferences: updatedPreferences,
         });
+
         toast.success(t("Tools saved"));
       } catch (err) {
         toast.error(err.message);
