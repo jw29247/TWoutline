@@ -15,6 +15,7 @@ import {
   Icon,
   PlusIcon,
   InternetIcon,
+  ToolsIcon,
 } from "outline-icons";
 import { ComponentProps } from "react";
 import * as React from "react";
@@ -45,6 +46,7 @@ const Profile = lazy(() => import("~/scenes/Settings/Profile"));
 const Security = lazy(() => import("~/scenes/Settings/Security"));
 const Shares = lazy(() => import("~/scenes/Settings/Shares"));
 const Templates = lazy(() => import("~/scenes/Settings/Templates"));
+const Tools = lazy(() => import("~/scenes/Settings/Tools"));
 
 export type ConfigItem = {
   name: string;
@@ -117,6 +119,15 @@ const useSettingsConfig = () => {
         enabled: can.update,
         group: t("Workspace"),
         icon: TeamIcon,
+      },
+      {
+        name: t("Tools"),
+        path: settingsPath("tools"),
+        component: Tools.Component,
+        preload: Tools.preload,
+        enabled: can.update,
+        group: t("Workspace"),
+        icon: ToolsIcon,
       },
       {
         name: t("Security"),
