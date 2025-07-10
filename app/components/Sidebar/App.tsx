@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { SearchIcon, HomeIcon, SidebarIcon, LinkIcon } from "outline-icons";
+import { SearchIcon, HomeIcon, SidebarIcon, ClockIcon } from "outline-icons";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -108,7 +108,7 @@ function AppSidebar() {
               />
               <SidebarLink
                 href="https://workshub.agency"
-                icon={<LinkIcon />}
+                icon={<ClockIcon />}
                 label={t("Go To WorksHub")}
               />
               {can.createDocument && <DraftsLink />}
