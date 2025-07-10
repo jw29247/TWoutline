@@ -29,7 +29,6 @@ import SidebarButton, { SidebarButtonProps } from "./components/SidebarButton";
 import SidebarLink from "./components/SidebarLink";
 import Starred from "./components/Starred";
 import ToggleButton from "./components/ToggleButton";
-import Tools from "./components/Tools";
 import TrashLink from "./components/TrashLink";
 
 function AppSidebar() {
@@ -111,9 +110,6 @@ function AppSidebar() {
             </Section>
           </Overflow>
           <Scrollable flex shadow>
-            <Section>
-              <Tools />
-            </Section>
             <Section>
               <Starred />
             </Section>
