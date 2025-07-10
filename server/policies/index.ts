@@ -23,6 +23,7 @@ import "./star";
 import "./subscription";
 import "./user";
 import "./team";
+import "./tool";
 import "./group";
 import "./webhookSubscription";
 import "./userMembership";

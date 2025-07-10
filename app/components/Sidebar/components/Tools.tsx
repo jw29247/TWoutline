@@ -1,28 +1,27 @@
 import { observer } from "mobx-react";
 import * as React from "react";
 import { useTranslation } from "react-i18next";
-import { TeamPreference, Tool } from "@shared/types";
-import useCurrentTeam from "~/hooks/useCurrentTeam";
+import useStores from "~/hooks/useStores";
 import Header from "./Header";
 import SidebarLink from "./SidebarLink";
 
 function Tools() {
   const { t } = useTranslation();
-  const team = useCurrentTeam();
+  const { tools } = useStores();
 
-  // Get tools from team preferences
-  const tools = React.useMemo(() => {
-    const toolsFromPrefs = team.preferences?.[TeamPreference.Tools];
-    return Array.isArray(toolsFromPrefs) ? toolsFromPrefs : [];
-  }, [team.preferences]);
+  // Fetch tools when component mounts
+  React.useEffect(() => {
+    void tools.fetchPage({});
+  }, [tools]);
 
-  if (!tools.length) {
+  // Don't show the section if there are no tools
+  if (!tools.orderedData.length) {
     return null;
   }
 
   return (
     <Header id="tools" title={t("Tools")}>
-      {tools.map((tool: Tool) => (
+      {tools.orderedData.map((tool) => (
         <SidebarLink
           key={tool.id}
           to={tool.url}
