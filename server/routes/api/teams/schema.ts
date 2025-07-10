@@ -58,6 +58,17 @@ export const TeamsUpdateSchema = BaseSchema.extend({
           .optional(),
         /** Side to display the document's table of contents in relation to the main content. */
         tocPosition: z.nativeEnum(TOCPosition).optional(),
+        /** Custom tools to display in the sidebar. */
+        tools: z
+          .array(
+            z.object({
+              id: z.string(),
+              title: z.string().min(1),
+              icon: z.string().min(1).max(2),
+              url: z.string().url(),
+            })
+          )
+          .optional(),
       })
       .optional(),
   }),
