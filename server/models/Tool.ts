@@ -57,17 +57,17 @@ class Tool extends IdModel<Tool> {
   @BelongsTo(() => User, "createdById")
   user: User;
 
-  @ForeignKey(() => User)
-  @Column(DataType.UUID)
   @IsUUID(4)
+  @Column(DataType.UUID)
+  @ForeignKey(() => User)
   createdById: string;
 
   @BelongsTo(() => Team, "teamId")
   team: Team;
 
-  @ForeignKey(() => Team)
-  @Column(DataType.UUID)
   @IsUUID(4)
+  @Column(DataType.UUID)
+  @ForeignKey(() => Team)
   teamId: string;
 }
 
