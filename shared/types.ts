@@ -259,13 +259,6 @@ export type CustomTheme = {
   accentText: string;
 };
 
-export type Tool = {
-  id: string;
-  title: string;
-  icon: string;
-  url: string;
-};
-
 export type PublicTeam = {
   avatarUrl: string;
   name: string;
@@ -299,8 +292,6 @@ export enum TeamPreference {
   CustomTheme = "customTheme",
   /** Side to display the document's table of contents in relation to the main content. */
   TocPosition = "tocPosition",
-  /** Custom tools to display in the sidebar. */
-  Tools = "tools",
 }
 
 export type TeamPreferences = {
@@ -314,7 +305,6 @@ export type TeamPreferences = {
   [TeamPreference.Commenting]?: boolean;
   [TeamPreference.CustomTheme]?: Partial<CustomTheme>;
   [TeamPreference.TocPosition]?: TOCPosition;
-  [TeamPreference.Tools]?: Tool[];
 };
 
 export enum NavigationNodeType {
