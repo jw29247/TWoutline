@@ -43,7 +43,6 @@ import Collection from "./Collection";
 import Document from "./Document";
 import Share from "./Share";
 import TeamDomain from "./TeamDomain";
-import Tool from "./Tool";
 import User from "./User";
 import ParanoidModel from "./base/ParanoidModel";
 import Fix from "./decorators/Fix";
@@ -353,9 +352,6 @@ class Team extends ParanoidModel<
 
   @HasMany(() => TeamDomain)
   allowedDomains: TeamDomain[];
-
-  @HasMany(() => Tool)
-  tools: Tool[];
 
   // hooks
 
