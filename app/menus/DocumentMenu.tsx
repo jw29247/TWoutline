@@ -44,8 +44,8 @@ import {
   archiveDocument,
   openDocumentHistory,
   openDocumentInsights,
-  publishDocument,
-  unpublishDocument,
+  // publishDocument, // Removed - documents are now always visible by default
+  // unpublishDocument, // Removed - documents are now always visible by default
   printDocument,
   openDocumentComments,
   createDocumentFromTemplate,
@@ -342,8 +342,8 @@ const MenuContent: React.FC<MenuContentProps> = observer(function MenuContent_({
           actionToMenuItem(importDocument, context),
           actionToMenuItem(createTemplateFromDocument, context),
           actionToMenuItem(duplicateDocument, context),
-          actionToMenuItem(publishDocument, context),
-          actionToMenuItem(unpublishDocument, context),
+          // actionToMenuItem(publishDocument, context), // Removed - documents are now always visible by default
+          // actionToMenuItem(unpublishDocument, context), // Removed - documents are now always visible by default
           actionToMenuItem(archiveDocument, context),
           actionToMenuItem(moveDocument, context),
           actionToMenuItem(moveTemplate, context),

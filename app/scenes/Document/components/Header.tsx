@@ -28,7 +28,7 @@ import Flex from "~/components/Flex";
 import Header from "~/components/Header";
 import Star from "~/components/Star";
 import Tooltip from "~/components/Tooltip";
-import { publishDocument } from "~/actions/definitions/documents";
+// import { publishDocument } from "~/actions/definitions/documents"; // Removed - documents are now always visible by default
 import { navigateToTemplateSettings } from "~/actions/definitions/navigation";
 import { restoreRevision } from "~/actions/definitions/revisions";
 import useActionContext from "~/hooks/useActionContext";
@@ -58,7 +58,7 @@ type Props = {
   isEditing: boolean;
   isSaving: boolean;
   isPublishing: boolean;
-  publishingIsDisabled: boolean;
+  // publishingIsDisabled: boolean; // Removed - documents are now always visible by default
   savingIsDisabled: boolean;
   onSelectTemplate: (template: Document) => void;
   onSave: (options: {
@@ -77,7 +77,7 @@ function DocumentHeader({
   isPublishing,
   isSaving,
   savingIsDisabled,
-  publishingIsDisabled,
+  // publishingIsDisabled, // Removed - documents are now always visible by default
   sharedTree,
   onSelectTemplate,
   onSave,
@@ -359,21 +359,7 @@ function DocumentHeader({
                 </Tooltip>
               </Action>
             )}
-            {can.publish && (
-              <Action>
-                <Button
-                  action={publishDocument}
-                  context={context}
-                  disabled={publishingIsDisabled}
-                  hideOnActionDisabled
-                  hideIcon
-                >
-                  {document.collectionId || document.isWorkspaceTemplate
-                    ? t("Publish")
-                    : `${t("Publish")}…`}
-                </Button>
-              </Action>
-            )}
+            {/* Publish button removed - documents are now always visible by default */}
             {!isDeleted && <Separator />}
             <Action>
               <DocumentMenu

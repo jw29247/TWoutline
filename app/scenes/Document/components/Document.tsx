@@ -523,9 +523,9 @@ class DocumentScene extends React.Component<Props> {
               isEditing={!readOnly && !!user?.separateEditMode}
               isSaving={this.isSaving}
               isPublishing={this.isPublishing}
-              publishingIsDisabled={
-                document.isSaving || this.isPublishing || this.isEmpty
-              }
+              // publishingIsDisabled={ // Removed - documents are now always visible by default
+              //   document.isSaving || this.isPublishing || this.isEmpty
+              // }
               savingIsDisabled={document.isSaving || this.isEmpty}
               sharedTree={this.props.sharedTree}
               onSelectTemplate={this.replaceSelection}
