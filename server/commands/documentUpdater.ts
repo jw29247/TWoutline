@@ -27,8 +27,6 @@ type Props = {
   insightsEnabled?: boolean;
   /** Whether the text be appended to the end instead of replace */
   append?: boolean;
-  /** The ID of the collection to move the document to */
-  collectionId?: string | null;
 };
 
 /**
@@ -52,13 +50,11 @@ export default async function documentUpdater(
     fullWidth,
     insightsEnabled,
     append,
-    collectionId,
     done,
   }: Props
 ): Promise<Document> {
   const { transaction } = ctx.state;
   const previousTitle = document.title;
-  const cId = collectionId || document.collectionId;
 
   if (title !== undefined) {
     document.title = title.trim();
@@ -90,17 +86,15 @@ export default async function documentUpdater(
   const event = {
     name: "documents.update",
     documentId: document.id,
-    collectionId: cId,
+    collectionId: document.collectionId,
     data: {
       done,
       title: document.title,
     },
   };
 
-  // If collectionId is provided and different from current, update it
-  if (collectionId && collectionId !== document.collectionId) {
-    document.collectionId = collectionId;
-  }
+  // Note: Moving a document to a different collection should be done through the
+  // documents.move endpoint, not documents.update, to ensure proper structure updates
 
   if (changed) {
     document.lastModifiedById = user.id;
@@ -120,7 +114,7 @@ export default async function documentUpdater(
     await Event.schedule({
       name: "documents.title_change",
       documentId: document.id,
-      collectionId: cId,
+      collectionId: document.collectionId,
       teamId: document.teamId,
       actorId: user.id,
       data: {

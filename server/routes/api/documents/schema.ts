@@ -245,9 +245,6 @@ export const DocumentsUpdateSchema = BaseSchema.extend({
     /** Doc template Id */
     templateId: z.string().uuid().nullish(),
 
-    /** Doc collection Id */
-    collectionId: z.string().uuid().nullish(),
-
     /** Boolean to denote if text should be appended */
     append: z.boolean().optional(),
 

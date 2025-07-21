@@ -1205,7 +1205,7 @@ router.post(
   transaction(),
   async (ctx: APIContext<T.DocumentsUpdateReq>) => {
     const { transaction } = ctx.state;
-    const { id, insightsEnabled, collectionId, ...input } =
+    const { id, insightsEnabled, ...input } =
       ctx.input.body;
     const editorVersion = ctx.headers["x-editor-version"] as string | undefined;
 
@@ -1224,21 +1224,12 @@ router.post(
       authorize(user, "updateInsights", document);
     }
 
-    // Publish logic removed - documents are always visible by default
-    // If collectionId is provided and document doesn't have one, update it
-    if (collectionId && !document.collectionId) {
-      collection = await Collection.findByPk(collectionId, {
-        userId: user.id,
-        transaction,
-      });
-      authorize(user, "createDocument", collection);
-    }
+    // Note: Moving documents between collections should be done via documents.move endpoint
 
     document = await documentUpdater(ctx, {
       document,
       user,
       ...input,
-      collectionId,
       insightsEnabled,
       editorVersion,
     });
