@@ -27,10 +27,6 @@ type Props = {
   insightsEnabled?: boolean;
   /** Whether the text be appended to the end instead of replace */
   append?: boolean;
-  /** Whether the document should be published to the collection */
-  publish?: boolean;
-  /** The ID of the collection to publish the document to */
-  collectionId?: string | null;
 };
 
 /**
@@ -54,14 +50,11 @@ export default async function documentUpdater(
     fullWidth,
     insightsEnabled,
     append,
-    publish,
-    collectionId,
     done,
   }: Props
 ): Promise<Document> {
   const { transaction } = ctx.state;
   const previousTitle = document.title;
-  const cId = collectionId || document.collectionId;
 
   if (title !== undefined) {
     document.title = title.trim();
@@ -93,24 +86,17 @@ export default async function documentUpdater(
   const event = {
     name: "documents.update",
     documentId: document.id,
-    collectionId: cId,
+    collectionId: document.collectionId,
     data: {
       done,
       title: document.title,
     },
   };
 
-  if (publish && (document.template || cId)) {
-    if (!document.collectionId) {
-      document.collectionId = cId;
-    }
-    await document.publish(user, cId, { transaction });
+  // Note: Moving a document to a different collection should be done through the
+  // documents.move endpoint, not documents.update, to ensure proper structure updates
 
-    await Event.createFromContext(ctx, {
-      ...event,
-      name: "documents.publish",
-    });
-  } else if (changed) {
+  if (changed) {
     document.lastModifiedById = user.id;
     document.updatedBy = user;
     await document.save({ transaction });
@@ -128,7 +114,7 @@ export default async function documentUpdater(
     await Event.schedule({
       name: "documents.title_change",
       documentId: document.id,
-      collectionId: cId,
+      collectionId: document.collectionId,
       teamId: document.teamId,
       actorId: user.id,
       data: {

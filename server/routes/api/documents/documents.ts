@@ -1205,7 +1205,7 @@ router.post(
   transaction(),
   async (ctx: APIContext<T.DocumentsUpdateReq>) => {
     const { transaction } = ctx.state;
-    const { id, insightsEnabled, publish, collectionId, ...input } =
+    const { id, insightsEnabled, ...input } =
       ctx.input.body;
     const editorVersion = ctx.headers["x-editor-version"] as string | undefined;
 
@@ -1224,44 +1224,12 @@ router.post(
       authorize(user, "updateInsights", document);
     }
 
-    if (publish) {
-      if (document.isDraft) {
-        authorize(user, "publish", document);
-      }
-
-      if (!document.collectionId && !document.isWorkspaceTemplate) {
-        assertPresent(
-          collectionId,
-          "collectionId is required to publish a draft without collection"
-        );
-        collection = await Collection.findByPk(collectionId!, {
-          userId: user.id,
-          transaction,
-        });
-      }
-
-      if (document.parentDocumentId) {
-        const parentDocument = await Document.findByPk(
-          document.parentDocumentId,
-          {
-            userId: user.id,
-            transaction,
-          }
-        );
-        authorize(user, "createChildDocument", parentDocument, { collection });
-      } else if (document.isWorkspaceTemplate) {
-        authorize(user, "createTemplate", user.team);
-      } else {
-        authorize(user, "createDocument", collection);
-      }
-    }
+    // Note: Moving documents between collections should be done via documents.move endpoint
 
     document = await documentUpdater(ctx, {
       document,
       user,
       ...input,
-      publish,
-      collectionId,
       insightsEnabled,
       editorVersion,
     });
@@ -1483,46 +1451,47 @@ router.post(
   }
 );
 
-router.post(
-  "documents.unpublish",
-  auth(),
-  validate(T.DocumentsUnpublishSchema),
-  async (ctx: APIContext<T.DocumentsUnpublishReq>) => {
-    const { id, detach } = ctx.input.body;
-    const { user } = ctx.state.auth;
+// Unpublish route removed - documents are now always visible by default
+// router.post(
+//   "documents.unpublish",
+//   auth(),
+//   validate(T.DocumentsUnpublishSchema),
+//   async (ctx: APIContext<T.DocumentsUnpublishReq>) => {
+//     const { id, detach } = ctx.input.body;
+//     const { user } = ctx.state.auth;
 
-    const document = await Document.findByPk(id, {
-      userId: user.id,
-    });
-    authorize(user, "unpublish", document);
+//     const document = await Document.findByPk(id, {
+//       userId: user.id,
+//     });
+//     authorize(user, "unpublish", document);
 
-    const childDocumentIds = await document.findAllChildDocumentIds({
-      archivedAt: {
-        [Op.eq]: null,
-      },
-    });
-    if (childDocumentIds.length > 0) {
-      throw InvalidRequestError(
-        "Cannot unpublish document with child documents"
-      );
-    }
+//     const childDocumentIds = await document.findAllChildDocumentIds({
+//       archivedAt: {
+//         [Op.eq]: null,
+//       },
+//     });
+//     if (childDocumentIds.length > 0) {
+//       throw InvalidRequestError(
+//         "Cannot unpublish document with child documents"
+//       );
+//     }
 
-    // detaching would unset collectionId from document, so save a ref to the affected collectionId.
-    const collectionId = document.collectionId;
+//     // detaching would unset collectionId from document, so save a ref to the affected collectionId.
+//     const collectionId = document.collectionId;
 
-    await document.unpublish(user, { detach });
-    await Event.createFromContext(ctx, {
-      name: "documents.unpublish",
-      documentId: document.id,
-      collectionId,
-    });
+//     await document.unpublish(user, { detach });
+//     await Event.createFromContext(ctx, {
+//       name: "documents.unpublish",
+//       documentId: document.id,
+//       collectionId,
+//     });
 
-    ctx.body = {
-      data: await presentDocument(ctx, document),
-      policies: presentPolicies(user, [document]),
-    };
-  }
-);
+//     ctx.body = {
+//       data: await presentDocument(ctx, document),
+//       policies: presentPolicies(user, [document]),
+//     };
+//   }
+// );
 
 router.post(
   "documents.import",
@@ -1610,7 +1579,6 @@ router.post(
       text,
       icon,
       color,
-      publish,
       collectionId,
       parentDocumentId,
       fullWidth,
@@ -1670,7 +1638,6 @@ router.post(
       icon,
       color,
       createdAt,
-      publish,
       collectionId: collection?.id,
       parentDocumentId,
       templateDocument,

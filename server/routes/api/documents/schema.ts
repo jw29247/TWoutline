@@ -242,14 +242,8 @@ export const DocumentsUpdateSchema = BaseSchema.extend({
     /** Boolean to denote if insights should be visible on the doc */
     insightsEnabled: z.boolean().optional(),
 
-    /** Boolean to denote if the doc should be published */
-    publish: z.boolean().optional(),
-
     /** Doc template Id */
     templateId: z.string().uuid().nullish(),
-
-    /** Doc collection Id */
-    collectionId: z.string().uuid().nullish(),
 
     /** Boolean to denote if text should be appended */
     append: z.boolean().optional(),
@@ -298,23 +292,21 @@ export const DocumentsDeleteSchema = BaseSchema.extend({
 
 export type DocumentsDeleteReq = z.infer<typeof DocumentsDeleteSchema>;
 
-export const DocumentsUnpublishSchema = BaseSchema.extend({
-  body: BaseIdSchema.extend({
-    /** Whether to detach the document from the collection */
-    detach: z.boolean().default(false),
-
-    /** @deprecated Version of the API to be used, remove in a few releases */
-    apiVersion: z.number().optional(),
-  }),
-});
-
-export type DocumentsUnpublishReq = z.infer<typeof DocumentsUnpublishSchema>;
+// Unpublish schema removed - documents are now always visible by default
+// export const DocumentsUnpublishSchema = BaseSchema.extend({
+//   body: BaseIdSchema.extend({
+//     /** Whether to detach the document from the collection */
+//     detach: z.boolean().default(false),
+//
+//     /** @deprecated Version of the API to be used, remove in a few releases */
+//     apiVersion: z.number().optional(),
+//   }),
+// });
+//
+// export type DocumentsUnpublishReq = z.infer<typeof DocumentsUnpublishSchema>;
 
 export const DocumentsImportSchema = BaseSchema.extend({
   body: z.object({
-    /** Whether to publish the imported docs. String as this is always multipart/form-data */
-    publish: z.preprocess((val) => val === "true", z.boolean()).optional(),
-
     /** Import docs to this collection */
     collectionId: z.string().uuid(),
 
@@ -346,9 +338,6 @@ export const DocumentsCreateSchema = BaseSchema.extend({
       .regex(ValidateColor.regex, { message: ValidateColor.message })
       .nullish(),
 
-    /** Boolean to denote if the doc should be published */
-    publish: z.boolean().optional(),
-
     /** Collection to create document within  */
     collectionId: z.string().uuid().nullish(),
 
@@ -372,13 +361,7 @@ export const DocumentsCreateSchema = BaseSchema.extend({
     /** Whether this should be considered a template */
     template: z.boolean().optional(),
   }),
-}).refine(
-  (req) =>
-    !(req.body.publish && !req.body.parentDocumentId && !req.body.collectionId),
-  {
-    message: "collectionId or parentDocumentId is required to publish",
-  }
-);
+});
 
 export type DocumentsCreateReq = z.infer<typeof DocumentsCreateSchema>;
 
