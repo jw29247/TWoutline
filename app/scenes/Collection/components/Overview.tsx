@@ -64,10 +64,8 @@ function Overview({ collection }: Props) {
           collectionId: collection.id,
           data: ProsemirrorHelper.getEmptyDocument(),
           ...params,
-        },
-        {
-          publish: true,
         }
+        // Removed publish parameter - documents are now always visible by default (PR #55)
       );
 
       return newDocument.url;

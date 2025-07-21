@@ -280,8 +280,8 @@ function InnerDocumentLink(
             user.getPreference(UserPreference.FullWidthDocuments),
           title: input,
           data: ProsemirrorHelper.getEmptyDocument(),
-        },
-        { publish: true }
+        }
+        // Removed publish parameter - documents are now always visible by default (PR #55)
       );
       collection?.addDocument(newDocument, node.id);
 

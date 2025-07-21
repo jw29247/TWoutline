@@ -126,6 +126,7 @@ export default async function documentCreator({
     title: titleWithReplacements,
     content: contentWithReplacements,
     state,
+    insightsEnabled: true, // Default to true to allow viewing insights
   });
 
   document.text = DocumentHelper.toMarkdown(document, {

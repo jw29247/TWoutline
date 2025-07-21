@@ -51,8 +51,8 @@ function DocumentNew({ template }: Props) {
             template,
             title: query.get("title") ?? "",
             data: ProsemirrorHelper.getEmptyDocument(),
-          },
-          { publish: collection?.id || parentDocumentId ? true : undefined }
+          }
+          // Removed publish parameter - documents are now always visible by default (PR #55)
         );
 
         history.replace(

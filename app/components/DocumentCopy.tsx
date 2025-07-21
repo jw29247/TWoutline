@@ -25,7 +25,6 @@ function DocumentCopy({ document, onSubmit }: Props) {
   const { t } = useTranslation();
   const { policies } = useStores();
   const collectionTrees = useCollectionTrees();
-  const [publish, setPublish] = React.useState<boolean>(!!document.publishedAt);
   const [recursive, setRecursive] = React.useState<boolean>(true);
   const [selectedPath, selectPath] = React.useState<NavigationNode | null>(
     null
@@ -54,7 +53,6 @@ function DocumentCopy({ document, onSubmit }: Props) {
 
     try {
       const result = await document.duplicate({
-        publish,
         recursive,
         title: document.title,
         collectionId: selectedPath.collectionId,
@@ -81,17 +79,6 @@ function DocumentCopy({ document, onSubmit }: Props) {
       <OptionsContainer>
         {!document.isTemplate && (
           <>
-            {document.collectionId && (
-              <Text size="small">
-                <Switch
-                  name="publish"
-                  label={t("Publish")}
-                  labelPosition="right"
-                  checked={publish}
-                  onChange={setPublish}
-                />
-              </Text>
-            )}
             {document.publishedAt && document.childDocuments.length > 0 && (
               <Text size="small">
                 <Switch
