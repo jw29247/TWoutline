@@ -46,9 +46,12 @@ export default function useImportDocument(
 
         for (const file of files) {
           try {
-            const doc = await documents.import(file, documentId, cId, {
-              publish: true,
-            });
+            const doc = await documents.import(
+              file,
+              documentId,
+              cId,
+              {} // Empty options - documents are now always visible by default (PR #55)
+            );
 
             if (redirect) {
               history.push(documentPath(doc));

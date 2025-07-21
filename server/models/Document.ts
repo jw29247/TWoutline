@@ -300,6 +300,7 @@ class Document extends ArchivableModel<
   @Column
   fullWidth: boolean;
 
+  @Default(true)
   @Column
   insightsEnabled: boolean;
 

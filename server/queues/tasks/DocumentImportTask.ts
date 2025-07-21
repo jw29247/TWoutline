@@ -58,7 +58,7 @@ export default class DocumentImportTask extends BaseTask<Props> {
           icon,
           text,
           state,
-          publish,
+          publishedAt: publish ? new Date() : null,
           collectionId,
           parentDocumentId,
           user,

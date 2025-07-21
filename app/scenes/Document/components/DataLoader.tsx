@@ -161,10 +161,8 @@ function DataLoader({ match, children }: Props) {
           parentDocumentId: nested ? document.id : document.parentDocumentId,
           data: ProsemirrorHelper.getEmptyDocument(),
           ...params,
-        },
-        {
-          publish: document.isDraft ? undefined : true,
         }
+        // Removed publish parameter - documents are now always visible by default (PR #55)
       );
 
       return newDocument.url;

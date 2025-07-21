@@ -95,8 +95,8 @@ const CollectionLink: React.FC<Props> = ({
           title: input,
           fullWidth: user.getPreference(UserPreference.FullWidthDocuments),
           data: ProsemirrorHelper.getEmptyDocument(),
-        },
-        { publish: true }
+        }
+        // Removed publish parameter - documents are now always visible by default (PR #55)
       );
       collection?.addDocument(newDocument);
 

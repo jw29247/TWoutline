@@ -460,9 +460,7 @@ function DocumentMenu({
           file,
           document.id,
           collection.id,
-          {
-            publish: true,
-          }
+          {} // Empty options - documents are now always visible by default (PR #55)
         );
         history.push(importedDocument.url);
       } catch (err) {

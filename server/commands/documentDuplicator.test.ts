@@ -93,7 +93,7 @@ describe("documentDuplicator", () => {
       documentDuplicator({
         document: original,
         collection: original.collection,
-        publish: false,
+        publishedAt: null,
         user,
         ctx: createContext({ user, transaction }),
       })

@@ -139,9 +139,12 @@ function CollectionMenu({
 
       try {
         const file = files[0];
-        const document = await documents.import(file, null, collection.id, {
-          publish: true,
-        });
+        const document = await documents.import(
+          file,
+          null,
+          collection.id,
+          {} // Empty options - documents are now always visible by default (PR #55)
+        );
         history.push(document.url);
       } catch (err) {
         toast.error(err.message);

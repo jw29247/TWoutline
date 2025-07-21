@@ -1210,14 +1210,13 @@ router.post(
     const editorVersion = ctx.headers["x-editor-version"] as string | undefined;
 
     const { user } = ctx.state.auth;
-    let collection: Collection | null | undefined;
 
     let document = await Document.findByPk(id, {
       userId: user.id,
       includeState: true,
       transaction,
     });
-    collection = document?.collection;
+    const collection = document?.collection;
     authorize(user, "update", document);
 
     if (collection && insightsEnabled !== undefined) {
@@ -1288,7 +1287,7 @@ router.post(
       collection,
       document,
       title,
-      publish,
+      publishedAt: publish ? new Date() : null,
       recursive,
       parentDocumentId,
       ctx,
@@ -1500,7 +1499,7 @@ router.post(
   validate(T.DocumentsImportSchema),
   multipart({ maximumFileSize: env.FILE_STORAGE_IMPORT_MAX_SIZE }),
   async (ctx: APIContext<T.DocumentsImportReq>) => {
-    const { collectionId, parentDocumentId, publish } = ctx.input.body;
+    const { collectionId, parentDocumentId } = ctx.input.body;
     const file = ctx.input.file;
     const { user } = ctx.state.auth;
 
@@ -1546,7 +1545,7 @@ router.post(
       userId: user.id,
       collectionId,
       parentDocumentId,
-      publish,
+      publish: true, // Documents are now always visible by default (PR #55)
       ip: ctx.request.ip,
     });
     const response: DocumentImportTaskResponse = await job.finished();

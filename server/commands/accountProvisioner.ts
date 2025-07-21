@@ -245,11 +245,12 @@ async function provisionFirstCollection(team: Team, user: User) {
       );
 
       document.content = await DocumentHelper.toJSON(document);
-
-      await document.publish(user, collection.id, {
-        silent: true,
-        transaction,
-      });
+      
+      // Documents are now published by default, no need for explicit publish
+      await document.save({ transaction });
+      
+      // Add document to collection structure
+      await collection.addDocumentToStructure(document, 0, { transaction });
     }
   });
 }

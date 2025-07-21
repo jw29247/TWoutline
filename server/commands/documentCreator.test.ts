@@ -132,7 +132,7 @@ describe("documentCreator", () => {
       expect(document.fullWidth).toBe(true);
     });
 
-    it("should create document as draft when publish is false", async () => {
+    it("should create document as draft when publishedAt is null", async () => {
       const user = await buildUser();
       const collection = await buildCollection({
         userId: user.id,
@@ -144,7 +144,7 @@ describe("documentCreator", () => {
           title: "Draft Document",
           text: "Draft content",
           collectionId: collection.id,
-          publish: false,
+          publishedAt: null,
           user,
           ctx,
         })
@@ -153,7 +153,7 @@ describe("documentCreator", () => {
       expect(document.publishedAt).toBeNull();
     });
 
-    it("should publish document when publish is true", async () => {
+    it("should publish document when publishedAt is set", async () => {
       const user = await buildUser();
       const collection = await buildCollection({
         userId: user.id,
@@ -165,7 +165,7 @@ describe("documentCreator", () => {
           title: "Published Document",
           text: "Published content",
           collectionId: collection.id,
-          publish: true,
+          publishedAt: new Date(),
           user,
           ctx,
         })
@@ -182,7 +182,7 @@ describe("documentCreator", () => {
           documentCreator({
             title: "Invalid Document",
             text: "Content",
-            publish: true,
+            publishedAt: new Date(),
             user,
             ctx,
           })

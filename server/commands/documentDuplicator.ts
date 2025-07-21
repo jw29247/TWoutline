@@ -16,8 +16,8 @@ type Props = {
   parentDocumentId?: string;
   /** Override of the duplicated document title */
   title?: string;
-  /** Override of the duplicated document publish state */
-  publish?: boolean;
+  /** Override of the duplicated document published date */
+  publishedAt?: Date | null;
   /** Whether to duplicate child documents */
   recursive?: boolean;
   /** The request context */
@@ -30,7 +30,7 @@ export default async function documentDuplicator({
   collection,
   parentDocumentId,
   title,
-  publish,
+  publishedAt,
   recursive,
   ctx,
 }: Props): Promise<Document[]> {
@@ -38,7 +38,7 @@ export default async function documentDuplicator({
   const sharedProperties = {
     user,
     collectionId: collection?.id,
-    publish: publish ?? !!document.publishedAt,
+    publishedAt: publishedAt !== undefined ? publishedAt : (document.publishedAt || new Date()),
     ctx,
   };
 
