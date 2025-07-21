@@ -24,7 +24,6 @@ allow(User, "read", Document, (actor, document) =>
         DocumentPermission.ReadWrite,
         DocumentPermission.Admin,
       ]),
-      and(!!document?.isDraft, actor.id === document?.createdById),
       and(
         !!document?.isWorkspaceTemplate,
         can(actor, "readTemplate", actor.team)
@@ -99,7 +98,6 @@ allow(User, "update", Document, (actor, document) =>
       ]),
       or(
         can(actor, "updateDocument", document?.collection),
-        and(!!document?.isDraft && actor.id === document?.createdById),
         and(
           !!document?.isWorkspaceTemplate,
           or(
@@ -112,13 +110,7 @@ allow(User, "update", Document, (actor, document) =>
   )
 );
 
-allow(User, "publish", Document, (actor, document) =>
-  and(
-    //
-    can(actor, "update", document),
-    !!document?.isDraft
-  )
-);
+// Publishing is no longer needed - documents are always visible by default
 
 allow(User, "manageUsers", Document, (actor, document) =>
   and(
@@ -127,8 +119,7 @@ allow(User, "manageUsers", Document, (actor, document) =>
     or(
       includesMembership(document, [DocumentPermission.Admin]),
       and(isTeamAdmin(actor, document), can(actor, "read", document)),
-      can(actor, "updateDocument", document?.collection),
-      !!document?.isDraft && actor.id === document?.createdById
+      can(actor, "updateDocument", document?.collection)
     )
   )
 );
@@ -140,7 +131,6 @@ allow(User, "duplicate", Document, (actor, document) =>
       includesMembership(document, [DocumentPermission.Admin]),
       and(isTeamAdmin(actor, document), can(actor, "read", document)),
       can(actor, "updateDocument", document?.collection),
-      !!document?.isDraft && actor.id === document?.createdById,
       and(
         !!document?.isWorkspaceTemplate,
         or(
@@ -157,7 +147,6 @@ allow(User, "move", Document, (actor, document) =>
     can(actor, "update", document),
     or(
       can(actor, "updateDocument", document?.collection),
-      and(!!document?.isDraft && actor.id === document?.createdById),
       and(
         !!document?.isWorkspaceTemplate,
         or(
@@ -170,14 +159,13 @@ allow(User, "move", Document, (actor, document) =>
 );
 
 allow(User, "createChildDocument", Document, (actor, document) =>
-  and(can(actor, "update", document), !document?.isDraft, !document?.template)
+  and(can(actor, "update", document), !document?.template)
 );
 
 allow(User, ["updateInsights", "pin", "unpin"], Document, (actor, document) =>
   and(
     can(actor, "update", document),
     can(actor, "update", document?.collection),
-    !document?.isDraft,
     !document?.template,
     !actor.isGuest
   )
@@ -188,7 +176,6 @@ allow(User, "pinToHome", Document, (actor, document) =>
     //
     isTeamAdmin(actor, document),
     isTeamMutable(actor),
-    !document?.isDraft,
     !document?.template,
     !!document?.isActive
   )
@@ -218,7 +205,6 @@ allow(User, ["restore", "permanentDelete"], Document, (actor, document) =>
         DocumentPermission.Admin,
       ]),
       can(actor, "updateDocument", document?.collection),
-      and(!!document?.isDraft && actor.id === document?.createdById),
       and(
         !!document?.isWorkspaceTemplate,
         can(actor, "updateTemplate", actor.team)
@@ -231,7 +217,6 @@ allow(User, ["restore", "permanentDelete"], Document, (actor, document) =>
 allow(User, "archive", Document, (actor, document) =>
   and(
     !document?.template,
-    !document?.isDraft,
     !!document?.isActive,
     can(actor, "update", document),
     or(
@@ -245,7 +230,6 @@ allow(User, "archive", Document, (actor, document) =>
 allow(User, "unarchive", Document, (actor, document) =>
   and(
     !document?.template,
-    !document?.isDraft,
     !document?.isDeleted,
     !!document?.archivedAt,
     can(actor, "read", document),
@@ -254,8 +238,7 @@ allow(User, "unarchive", Document, (actor, document) =>
         DocumentPermission.ReadWrite,
         DocumentPermission.Admin,
       ]),
-      can(actor, "updateDocument", document?.collection),
-      and(!!document?.isDraft && actor.id === document?.createdById)
+      can(actor, "updateDocument", document?.collection)
     )
   )
 );
@@ -267,33 +250,7 @@ allow(
   (document, revision) => document.id === revision?.documentId
 );
 
-allow(User, "unpublish", Document, (user, document) => {
-  if (
-    !document ||
-    user.isGuest ||
-    user.isViewer ||
-    !document.isActive ||
-    document.isDraft
-  ) {
-    return false;
-  }
-
-  if (
-    document.isWorkspaceTemplate &&
-    (user.id === document.createdById || can(user, "updateTemplate", user.team))
-  ) {
-    return true;
-  }
-
-  invariant(
-    document.collection,
-    "collection is missing, did you forget to include in the query scope?"
-  );
-  if (cannot(user, "updateDocument", document.collection)) {
-    return false;
-  }
-  return user.teamId === document.teamId;
-});
+// Unpublish permission removed - documents are always visible by default
 
 function includesMembership(
   document: Document | null,

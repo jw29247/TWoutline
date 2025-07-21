@@ -45,7 +45,7 @@ export type SearchParams = {
 };
 
 type ImportOptions = {
-  publish?: boolean;
+  // publish?: boolean; // Documents are now always visible by default
 };
 
 export default class DocumentsStore extends Store<Document> {
@@ -483,11 +483,9 @@ export default class DocumentsStore extends Store<Document> {
   templatize = async ({
     id,
     collectionId,
-    publish,
   }: {
     id: string;
     collectionId: string | null;
-    publish: boolean;
   }): Promise<Document | null | undefined> => {
     const doc: Document | null | undefined = this.data.get(id);
     invariant(doc, "Document should exist");
@@ -499,7 +497,6 @@ export default class DocumentsStore extends Store<Document> {
     const res = await client.post("/documents.templatize", {
       id,
       collectionId,
-      publish,
     });
     invariant(res?.data, "Document not available");
     this.addPolicies(res.policies);
@@ -617,7 +614,7 @@ export default class DocumentsStore extends Store<Document> {
     document: Document,
     options?: {
       title?: string;
-      publish?: boolean;
+      // publish?: boolean; // Documents are now always visible by default
       recursive?: boolean;
     }
   ): Promise<Document[]> => {
@@ -670,10 +667,10 @@ export default class DocumentsStore extends Store<Document> {
         key: "title",
         value: title,
       },
-      {
-        key: "publish",
-        value: options.publish,
-      },
+      // {
+      //   key: "publish",
+      //   value: options.publish,
+      // },
       {
         key: "file",
         value: file,
@@ -761,33 +758,34 @@ export default class DocumentsStore extends Store<Document> {
     }
   };
 
-  @action
-  unpublish = async (
-    document: Document,
-    options: { detach?: boolean } = {
-      detach: false,
-    }
-  ) => {
-    const res = await client.post("/documents.unpublish", {
-      id: document.id,
-      ...options,
-    });
+  // Unpublish removed - documents are now always visible by default
+  // @action
+  // unpublish = async (
+  //   document: Document,
+  //   options: { detach?: boolean } = {
+  //     detach: false,
+  //   }
+  // ) => {
+  //   const res = await client.post("/documents.unpublish", {
+  //     id: document.id,
+  //     ...options,
+  //   });
 
-    runInAction("Document#unpublish", () => {
-      invariant(res?.data, "Data should be available");
-      // unpublishing could sometimes detach the document from the collection.
-      // so, get the collection id before data is updated.
-      const collectionId = document.collectionId;
+  //   runInAction("Document#unpublish", () => {
+  //     invariant(res?.data, "Data should be available");
+  //     // unpublishing could sometimes detach the document from the collection.
+  //     // so, get the collection id before data is updated.
+  //     const collectionId = document.collectionId;
 
-      document.updateData(res.data);
-      this.addPolicies(res.policies);
+  //     document.updateData(res.data);
+  //     this.addPolicies(res.policies);
 
-      if (collectionId) {
-        const collection = this.rootStore.collections.get(collectionId);
-        collection?.removeDocument(document.id);
-      }
-    });
-  };
+  //     if (collectionId) {
+  //       const collection = this.rootStore.collections.get(collectionId);
+  //       collection?.removeDocument(document.id);
+  //     }
+  //   });
+  // };
 
   @action
   emptyTrash = async () => {

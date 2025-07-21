@@ -22,8 +22,8 @@ import {
   ShuffleIcon,
   HistoryIcon,
   GraphIcon,
-  UnpublishIcon,
-  PublishIcon,
+  // UnpublishIcon,
+  // PublishIcon,
   CommentIcon,
   CopyIcon,
   EyeIcon,
@@ -44,7 +44,7 @@ import UserMembership from "~/models/UserMembership";
 import DocumentDelete from "~/scenes/DocumentDelete";
 import DocumentMove from "~/scenes/DocumentMove";
 import DocumentPermanentDelete from "~/scenes/DocumentPermanentDelete";
-import DocumentPublish from "~/scenes/DocumentPublish";
+// import DocumentPublish from "~/scenes/DocumentPublish";
 import DeleteDocumentsInTrash from "~/scenes/Trash/components/DeleteDocumentsInTrash";
 import ConfirmationDialog from "~/components/ConfirmationDialog";
 import DocumentCopy from "~/components/DocumentCopy";
@@ -249,78 +249,80 @@ export const unstarDocument = createAction({
   },
 });
 
-export const publishDocument = createAction({
-  name: ({ t }) => t("Publish"),
-  analyticsName: "Publish document",
-  section: ActiveDocumentSection,
-  icon: <PublishIcon />,
-  visible: ({ activeDocumentId, stores }) => {
-    if (!activeDocumentId) {
-      return false;
-    }
-    const document = stores.documents.get(activeDocumentId);
-    return (
-      !!document?.isDraft && stores.policies.abilities(activeDocumentId).publish
-    );
-  },
-  perform: async ({ activeDocumentId, stores, t }) => {
-    if (!activeDocumentId) {
-      return;
-    }
+// Publish action removed - documents are now always visible by default
+// export const publishDocument = createAction({
+//   name: ({ t }) => t("Publish"),
+//   analyticsName: "Publish document",
+//   section: ActiveDocumentSection,
+//   icon: <PublishIcon />,
+//   visible: ({ activeDocumentId, stores }) => {
+//     if (!activeDocumentId) {
+//       return false;
+//     }
+//     const document = stores.documents.get(activeDocumentId);
+//     return (
+//       !!document?.isDraft && stores.policies.abilities(activeDocumentId).publish
+//     );
+//   },
+//   perform: async ({ activeDocumentId, stores, t }) => {
+//     if (!activeDocumentId) {
+//       return;
+//     }
+//
+//     const document = stores.documents.get(activeDocumentId);
+//     if (document?.publishedAt) {
+//       return;
+//     }
+//
+//     if (document?.collectionId || document?.template) {
+//       await document.save(undefined, {
+//         publish: true,
+//       });
+//       toast.success(
+//         t("Published {{ documentName }}", {
+//           documentName: document.noun,
+//         })
+//       );
+//     } else if (document) {
+//       stores.dialogs.openModal({
+//         title: t("Publish document"),
+//         content: <DocumentPublish document={document} />,
+//       });
+//     }
+//   },
+// });
 
-    const document = stores.documents.get(activeDocumentId);
-    if (document?.publishedAt) {
-      return;
-    }
-
-    if (document?.collectionId || document?.template) {
-      await document.save(undefined, {
-        publish: true,
-      });
-      toast.success(
-        t("Published {{ documentName }}", {
-          documentName: document.noun,
-        })
-      );
-    } else if (document) {
-      stores.dialogs.openModal({
-        title: t("Publish document"),
-        content: <DocumentPublish document={document} />,
-      });
-    }
-  },
-});
-
-export const unpublishDocument = createAction({
-  name: ({ t }) => t("Unpublish"),
-  analyticsName: "Unpublish document",
-  section: ActiveDocumentSection,
-  icon: <UnpublishIcon />,
-  visible: ({ activeDocumentId, stores }) => {
-    if (!activeDocumentId) {
-      return false;
-    }
-    return stores.policies.abilities(activeDocumentId).unpublish;
-  },
-  perform: async ({ activeDocumentId, stores, t }) => {
-    if (!activeDocumentId) {
-      return;
-    }
-
-    const document = stores.documents.get(activeDocumentId);
-    if (!document) {
-      return;
-    }
-
-    await document.unpublish();
-
-    toast.success(
-      t("Unpublished {{ documentName }}", {
-        documentName: document.noun,
-      })
-    );
-  },
-});
+// Unpublish action removed - documents are now always visible by default
+// export const unpublishDocument = createAction({
+//   name: ({ t }) => t("Unpublish"),
+//   analyticsName: "Unpublish document",
+//   section: ActiveDocumentSection,
+//   icon: <UnpublishIcon />,
+//   visible: ({ activeDocumentId, stores }) => {
+//     if (!activeDocumentId) {
+//       return false;
+//     }
+//     return stores.policies.abilities(activeDocumentId).unpublish;
+//   },
+//   perform: async ({ activeDocumentId, stores, t }) => {
+//     if (!activeDocumentId) {
+//       return;
+//     }
+//
+//     const document = stores.documents.get(activeDocumentId);
+//     if (!document) {
+//       return;
+//     }
+//
+//     await document.unpublish();
+//
+//     toast.success(
+//       t("Unpublished {{ documentName }}", {
+//         documentName: document.noun,
+//       })
+//     );
+//   },
+// });
 
 export const subscribeDocument = createAction({
   name: ({ t }) => t("Subscribe"),
@@ -769,7 +771,7 @@ export const importDocument = createAction({
           activeDocumentId,
           activeCollectionId,
           {
-            publish: true,
+            // publish: true, // Documents are now always visible by default
           }
         );
         history.push(document.url);
@@ -1235,8 +1237,8 @@ export const rootDocumentActions = [
   copyDocumentAsPlainText,
   starDocument,
   unstarDocument,
-  publishDocument,
-  unpublishDocument,
+  // publishDocument,
+  // unpublishDocument,
   subscribeDocument,
   unsubscribeDocument,
   searchInDocument,

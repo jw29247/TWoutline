@@ -36,7 +36,7 @@ import Relation from "./decorators/Relation";
 import { Searchable } from "./interfaces/Searchable";
 
 type SaveOptions = JSONObject & {
-  publish?: boolean;
+  // publish?: boolean; // Documents are now always visible by default
   done?: boolean;
   autosave?: boolean;
 };
@@ -197,7 +197,7 @@ export default class Document extends ArchivableModel implements Searchable {
   updatedBy: User | undefined;
 
   @observable
-  publishedAt: string | undefined;
+  publishedAt: string | undefined; // Always set since documents are published by default
 
   /**
    * @deprecated Use path instead
@@ -327,7 +327,7 @@ export default class Document extends ArchivableModel implements Searchable {
     return !!(
       auth.team?.sharing !== false &&
       this.collection?.sharing !== false &&
-      (share?.published || (sharedParent?.published && !this.isDraft))
+      (share?.published || sharedParent?.published)
     );
   }
 
@@ -371,7 +371,7 @@ export default class Document extends ArchivableModel implements Searchable {
 
   @computed
   get isDraft(): boolean {
-    return !this.publishedAt;
+    return false; // Documents are always published by default
   }
 
   @computed
@@ -461,11 +461,12 @@ export default class Document extends ArchivableModel implements Searchable {
   restore = (options?: { revisionId?: string; collectionId?: string }) =>
     this.store.restore(this, options);
 
-  unpublish = (
-    options: { detach?: boolean } = {
-      detach: false,
-    }
-  ) => this.store.unpublish(this, options);
+  // Unpublish removed - documents are now always visible by default
+  // unpublish = (
+  //   options: { detach?: boolean } = {
+  //     detach: false,
+  //   }
+  // ) => this.store.unpublish(this, options);
 
   @action
   enableEmbeds = () => {
@@ -559,11 +560,9 @@ export default class Document extends ArchivableModel implements Searchable {
   @action
   templatize = ({
     collectionId,
-    publish,
   }: {
     collectionId: string | null;
-    publish: boolean;
-  }) => this.store.templatize({ id: this.id, collectionId, publish });
+  }) => this.store.templatize({ id: this.id, collectionId });
 
   @action
   save = async (
@@ -597,7 +596,7 @@ export default class Document extends ArchivableModel implements Searchable {
 
   duplicate = (options?: {
     title?: string;
-    publish?: boolean;
+    // publish?: boolean; // Documents are now always visible by default
     recursive?: boolean;
     collectionId?: string | null;
     parentDocumentId?: string;
@@ -652,7 +651,7 @@ export default class Document extends ArchivableModel implements Searchable {
       icon: this.icon ?? undefined,
       children: this.childDocuments.map((doc) => doc.asNavigationNode),
       url: this.url,
-      isDraft: this.isDraft,
+      isDraft: false, // Documents are always published by default
     };
   }
 

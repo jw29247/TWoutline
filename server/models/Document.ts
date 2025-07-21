@@ -938,61 +938,62 @@ class Document extends ArchivableModel<
     return findAllChildDocumentIds(this.id);
   };
 
-  publish = async (
-    user: User,
-    collectionId: string | null | undefined,
-    options: SaveOptions
-  ): Promise<this> => {
-    const { transaction } = options;
+  // Publish method removed - documents are now always visible by default
+  // publish = async (
+  //   user: User,
+  //   collectionId: string | null | undefined,
+  //   options: SaveOptions
+  // ): Promise<this> => {
+  //   const { transaction } = options;
 
-    // If the document is already published then calling publish should act like
-    // a regular save
-    if (this.publishedAt) {
-      return this.save(options);
-    }
+  //   // If the document is already published then calling publish should act like
+  //   // a regular save
+  //   if (this.publishedAt) {
+  //     return this.save(options);
+  //   }
 
-    if (!this.collectionId) {
-      this.collectionId = collectionId;
-    }
+  //   if (!this.collectionId) {
+  //     this.collectionId = collectionId;
+  //   }
 
-    if (!this.template && this.collectionId) {
-      const collection = await Collection.findByPk(this.collectionId, {
-        includeDocumentStructure: true,
-        transaction,
-        lock: Transaction.LOCK.UPDATE,
-      });
+  //   if (!this.template && this.collectionId) {
+  //     const collection = await Collection.findByPk(this.collectionId, {
+  //       includeDocumentStructure: true,
+  //       transaction,
+  //       lock: Transaction.LOCK.UPDATE,
+  //     });
 
-      if (collection) {
-        await collection.addDocumentToStructure(this, 0, { transaction });
-        if (this.collection) {
-          this.collection.documentStructure = collection.documentStructure;
-        }
-      }
-    }
+  //     if (collection) {
+  //       await collection.addDocumentToStructure(this, 0, { transaction });
+  //       if (this.collection) {
+  //         this.collection.documentStructure = collection.documentStructure;
+  //       }
+  //     }
+  //   }
 
-    // Copy the group and user memberships from the parent document, if any
-    if (this.parentDocumentId) {
-      await GroupMembership.copy(
-        {
-          documentId: this.parentDocumentId,
-        },
-        this,
-        { transaction }
-      );
-      await UserMembership.copy(
-        {
-          documentId: this.parentDocumentId,
-        },
-        this,
-        { transaction }
-      );
-    }
+  //   // Copy the group and user memberships from the parent document, if any
+  //   if (this.parentDocumentId) {
+  //     await GroupMembership.copy(
+  //       {
+  //         documentId: this.parentDocumentId,
+  //       },
+  //       this,
+  //       { transaction }
+  //     );
+  //     await UserMembership.copy(
+  //       {
+  //         documentId: this.parentDocumentId,
+  //       },
+  //       this,
+  //       { transaction }
+  //     );
+  //   }
 
-    this.lastModifiedById = user.id;
-    this.updatedBy = user;
-    this.publishedAt = new Date();
-    return this.save(options);
-  };
+  //   this.lastModifiedById = user.id;
+  //   this.updatedBy = user;
+  //   this.publishedAt = new Date();
+  //   return this.save(options);
+  // };
 
   isCollectionDeleted = async () => {
     if (this.deletedAt || this.archivedAt) {
@@ -1010,49 +1011,50 @@ class Document extends ArchivableModel<
     return false;
   };
 
-  /**
-   *
-   * @param user User who is performing the action
-   * @param options.detach Whether to detach the document from the containing collection
-   * @returns Updated document
-   */
-  unpublish = async (user: User, options: { detach: boolean }) => {
-    // If the document is already a draft then calling unpublish should act like save
-    if (!this.publishedAt) {
-      return this.save();
-    }
+  // Unpublish method removed - documents are now always visible by default
+  // /**
+  //  *
+  //  * @param user User who is performing the action
+  //  * @param options.detach Whether to detach the document from the containing collection
+  //  * @returns Updated document
+  //  */
+  // unpublish = async (user: User, options: { detach: boolean }) => {
+  //   // If the document is already a draft then calling unpublish should act like save
+  //   if (!this.publishedAt) {
+  //     return this.save();
+  //   }
 
-    await this.sequelize.transaction(async (transaction: Transaction) => {
-      const collection = this.collectionId
-        ? await Collection.findByPk(this.collectionId, {
-            includeDocumentStructure: true,
-            transaction,
-            lock: transaction.LOCK.UPDATE,
-          })
-        : undefined;
+  //   await this.sequelize.transaction(async (transaction: Transaction) => {
+  //     const collection = this.collectionId
+  //       ? await Collection.findByPk(this.collectionId, {
+  //           includeDocumentStructure: true,
+  //           transaction,
+  //           lock: transaction.LOCK.UPDATE,
+  //         })
+  //       : undefined;
 
-      if (collection) {
-        await collection.removeDocumentInStructure(this, { transaction });
-        if (this.collection) {
-          this.collection.documentStructure = collection.documentStructure;
-        }
-      }
-    });
+  //     if (collection) {
+  //       await collection.removeDocumentInStructure(this, { transaction });
+  //       if (this.collection) {
+  //         this.collection.documentStructure = collection.documentStructure;
+  //       }
+  //     }
+  //   });
 
-    // unpublishing a document converts the ownership to yourself, so that it
-    // will appear in your drafts rather than the original creators
-    this.createdById = user.id;
-    this.lastModifiedById = user.id;
-    this.createdBy = user;
-    this.updatedBy = user;
-    this.publishedAt = null;
+  //   // unpublishing a document converts the ownership to yourself, so that it
+  //   // will appear in your drafts rather than the original creators
+  //   this.createdById = user.id;
+  //   this.lastModifiedById = user.id;
+  //   this.createdBy = user;
+  //   this.updatedBy = user;
+  //   this.publishedAt = null;
 
-    if (options.detach) {
-      this.collectionId = null;
-    }
+  //   if (options.detach) {
+  //     this.collectionId = null;
+  //   }
 
-    return this.save();
-  };
+  //   return this.save();
+  // };
 
   // Moves a document from being visible to the team within a collection
   // to the archived area, where it can be subsequently restored.

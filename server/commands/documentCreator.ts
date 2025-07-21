@@ -1,7 +1,7 @@
 import { Optional } from "utility-types";
 import { ProsemirrorHelper as SharedProsemirrorHelper } from "@shared/utils/ProsemirrorHelper";
 import { TextHelper } from "@shared/utils/TextHelper";
-import { Document, Event, User } from "@server/models";
+import { Document, Event, User, GroupMembership, UserMembership } from "@server/models";
 import { DocumentHelper } from "@server/models/helpers/DocumentHelper";
 import { ProsemirrorHelper } from "@server/models/helpers/ProsemirrorHelper";
 import { APIContext } from "@server/types";
@@ -30,7 +30,6 @@ type Props = Optional<
   >
 > & {
   state?: Buffer;
-  publish?: boolean;
   templateDocument?: Document | null;
   user: User;
   ctx: APIContext;
@@ -44,7 +43,6 @@ export default async function documentCreator({
   state,
   id,
   urlId,
-  publish,
   collectionId,
   parentDocumentId,
   content,
@@ -118,7 +116,7 @@ export default async function documentCreator({
     createdById: user.id,
     template,
     templateId,
-    publishedAt,
+    publishedAt: publishedAt ?? new Date(), // Default to current date (published by default)
     importId,
     apiImportId,
     sourceMetadata,
@@ -158,31 +156,31 @@ export default async function documentCreator({
     }
   );
 
-  if (publish) {
-    if (!collectionId && !template) {
-      throw new Error("Collection ID is required to publish");
+  // Documents are now published by default, no need for explicit publish step
+  // If collectionId is provided, add document to collection structure
+  if (collectionId) {
+    const collection = await document.$get("collection", { transaction });
+    if (collection) {
+      await collection.addDocumentToStructure(document, 0, { transaction });
     }
+  }
 
-    await document.publish(user, collectionId, { silent: true, transaction });
-    if (document.title) {
-      await Event.create(
-        {
-          name: "documents.publish",
-          documentId: document.id,
-          collectionId: document.collectionId,
-          teamId: document.teamId,
-          actorId: user.id,
-          data: {
-            source: importId ? "import" : undefined,
-            title: document.title,
-          },
-          ip,
-        },
-        {
-          transaction,
-        }
-      );
-    }
+  // Copy permissions from parent document if it exists (permission inheritance)
+  if (parentDocumentId) {
+    await GroupMembership.copy(
+      {
+        documentId: parentDocumentId,
+      },
+      document,
+      { transaction }
+    );
+    await UserMembership.copy(
+      {
+        documentId: parentDocumentId,
+      },
+      document,
+      { transaction }
+    );
   }
 
   // reload to get all of the data needed to present (user, collection etc)

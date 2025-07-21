@@ -27,9 +27,7 @@ type Props = {
   insightsEnabled?: boolean;
   /** Whether the text be appended to the end instead of replace */
   append?: boolean;
-  /** Whether the document should be published to the collection */
-  publish?: boolean;
-  /** The ID of the collection to publish the document to */
+  /** The ID of the collection to move the document to */
   collectionId?: string | null;
 };
 
@@ -54,7 +52,6 @@ export default async function documentUpdater(
     fullWidth,
     insightsEnabled,
     append,
-    publish,
     collectionId,
     done,
   }: Props
@@ -100,17 +97,12 @@ export default async function documentUpdater(
     },
   };
 
-  if (publish && (document.template || cId)) {
-    if (!document.collectionId) {
-      document.collectionId = cId;
-    }
-    await document.publish(user, cId, { transaction });
+  // If collectionId is provided and different from current, update it
+  if (collectionId && collectionId !== document.collectionId) {
+    document.collectionId = collectionId;
+  }
 
-    await Event.createFromContext(ctx, {
-      ...event,
-      name: "documents.publish",
-    });
-  } else if (changed) {
+  if (changed) {
     document.lastModifiedById = user.id;
     document.updatedBy = user;
     await document.save({ transaction });
